@@ -73,7 +73,7 @@ def _flavors(sec):
         items = "".join(f"<span>{e(x)}</span>" for x in g["flavors"])
         out.append('<div class="flavgroup">')
         out.append(f'<div class="gname">{e(g["name"])}</div>')
-        out.append(f'<div class="flavlist" style="column-count:{ncol}">{items}</div>')
+        out.append(f'<div class="flavlist cols-{ncol}">{items}</div>')
         out.append("</div>")
     if sec.get("star_note"):
         out.append(f'<div class="popnote">{e(sec["star_note"])}</div>')
