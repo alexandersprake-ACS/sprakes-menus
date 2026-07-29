@@ -178,6 +178,12 @@ def main(argv=None):
         with open(os.path.join(SITE, "robots.txt"), "w") as fh:
             fh.write(robots)
 
+    # custom domain: the CNAME file must ship inside every Pages artifact so
+    # redeploys never drop the domain binding
+    if site.get("custom_domain"):
+        with open(os.path.join(SITE, "CNAME"), "w") as fh:
+            fh.write(site["custom_domain"] + "\n")
+
     # hard gate: forbidden strings (spec 5.1 / 8.7)
     hits = forbidden_scan(site)
     if hits:

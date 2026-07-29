@@ -2,9 +2,18 @@
   "_comment": "Site-wide build settings. `noindex` is false per the owner's July-17 launch decision (prices are already public via Linktree; menus should be searchable). `forbidden_strings` are scanned across the whole built site (spec 5.1 / 8.7) — the build FAILS if any appears.",
   "site_title": "Sprake's — Menus",
   "brand": "SPRAKE'S",
-  "base_url": "https://alexandersprake-acs.github.io/sprakes-menus",
+  "base_url": "https://menus.sprakes-usa.com",
   "noindex": false,
   "quote_text": "Quote",
   "popular_quantity": 1000,
-  "forbidden_strings": ["Pacer", "Supply Joint", "SSWLA", "Terp Science", "Terpene Store", "Gas Station", "$0.00"]
+  "forbidden_strings": [
+    "Pacer",
+    "Supply Joint",
+    "SSWLA",
+    "Terp Science",
+    "Terpene Store",
+    "Gas Station",
+    "$0.00"
+  ],
+  "custom_domain": "menus.sprakes-usa.com"
 }
