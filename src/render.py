@@ -176,6 +176,10 @@ HUB_JS = """
   });
   window.addEventListener('popstate', function(){ select(location.hash.slice(1), false); });
   select(location.hash.slice(1), false);
+  var bar = document.querySelector('.tabbar');
+  function onScroll(){ bar.classList.toggle('scrolled', window.scrollY > 8); }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
 })();
 """
 
