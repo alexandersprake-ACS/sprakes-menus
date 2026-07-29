@@ -1,0 +1,12 @@
+{
+  "_comment": "Standing footer/disclaimer text. The cash/Zelle line carries over VERBATIM (spec 5.8 — discount framing, allowed). The terpene liability disclaimer is the SANITIZED replacement (spec 5.9): it names NO third parties. R may edit.",
+  "footer_discount": "3% discount on cash or Zelle payments.",
+  "terpene_disclaimer": {
+    "heading": "*MAY NOT PASS LABORATORY TESTING",
+    "body": "There may be others that may have faint traces of residual solvents. They should work with flower but it is recommended that a small amount is tested first before infusing large quantities to be 100% sure. Sprake's cannot be liable should any test fail."
+  },
+  "infusion_notes": {
+    "own_terpenes": "Using your own terpenes? Service price only.",
+    "flavor_note": ["CHOOSE FLAVOR NOTE:", "Light, Medium, or Heavy*"]
+  }
+}

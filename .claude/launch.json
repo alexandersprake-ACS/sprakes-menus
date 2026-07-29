@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "menus",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["/Users/acs/Desktop/Menu Build/scripts/serve.py", "8123"],
+      "port": 8123
+    }
+  ]
+}

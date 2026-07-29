@@ -1,0 +1,18 @@
+{
+  "_comment": "MARKETING flavor list published on the Terpenes and Terpene Infusion menus (spec 5.4). NOT the internal TERP-BOT-* SKUs. Names are VERBATIM (spec 5.3): never normalize spelling, casing, punctuation, or apparent typos. A trailing '*' means 'may not pass laboratory testing'. Content seeded from the approved July-14 menu; R may replace/extend. Build fails loudly if this file is missing.",
+  "star_note": "*MAY NOT PASS LABORATORY TESTING",
+  "groups": [
+    {
+      "name": "FRUIT",
+      "flavors": ["Apricot Jelly", "Banana", "Coconut", "Fruit Burst*", "GPOG", "Grape - Green", "Grape - Welches", "Grape - Red", "Guava", "Kiwi Berry", "Lychee", "Mango", "Mango Peach", "Orange*", "Papaya", "Passionfruit", "Pear", "Pineapple", "Raspberry", "Strawberry Banana", "Tropical Punch"]
+    },
+    {
+      "name": "CANDY",
+      "flavors": ["Baja Blast", "Blueberry", "Bubblegum Hubba Bubba*", "Bubblegum Bazooka Joe*", "Caramel", "Cherry - Sour", "Cherry - Sweet", "Chocolate", "Churro", "Confetti Cake", "Cotton Candy", "Fruitier Cereal*", "Glazed Donut", "Green Jolly Rancher (Sour Apple)", "Lemon Candy", "Marshmallow", "Nerds Candy", "Nutella", "Peach Rings", "Peanut Butter", "Peanut Butter and Jelly", "Pez", "Pie Crust", "Rainbow Ice Cream*", "Red Gushers", "Runtz Candy", "Skittles", "Starburst", "Vanilla", "Watermelon Candy"]
+    },
+    {
+      "name": "EXPANDED FLAVORS",
+      "flavors": ["Almond Joy", "Apple Jacks", "Banana Cheesecake", "Banana Coconut", "Banana Nut", "Banana Pie", "Banana Split", "Banana Upside-down Cake", "Banana's Foster", "Birthday Cake", "Blue Razz", "Blueberry Milkshake", "Blueberry Pancakes", "Blueberry Shortcake", "Bubblegum Ice Cream*", "Cactus Cooler*", "Caramel Apple", "Caramel Pineapple", "Cherries Jubilee", "Cherry Bubblegum*", "Cherry Cheesecake", "Cherry Cobbler", "Cherry Ice Cream", "Cherry Kool-Aide", "Cherry Pie", "Cherry Starburst", "Cherry Tart", "Chips Ahoy", "Chocolate Cake", "Chocolate Cheesecake", "Chocolate Covered Bananas", "Chocolate Covered Cherries", "Chocolate Covered Strawberries", "Cinnamon Roll", "Cinnamon Swirl", "Cinnamon Toast Crunch", "Coco Banana", "Coco Puffs", "Coconut Cheesecake", "Coconut Cream Pie", "Coconut Island Punch", "Cotton Candy Caramel", "Crunch Berries", "Dulce De Leche", "Ferro Rocher", "Froot Loops", "Frosted Flakes", "Georgia Peach Pie", "Golden Grahams", "Granny Smith Apple Pie", "Grape Bubblegum*", "Grape Lemonade", "Grape Kool-Aide", "Grape Milkshake", "Grape Starburst", "Hawaiian Guava Cake", "Hazelnut Dream", "Honey Bear*", "Key lime Pie", "Kiwi Grape", "Kiwi Mango", "Kiwi Milkshake", "Kiwi Passion", "Kiwi Strawberry", "Krispy Kream", "Lemon Starburst", "Mango Guava", "Mango Starburst", "Maple Syrup", "Milk Duds", "Mounds", "Nilla Wafers", "Nutella Cookies", "Oero Cheesecake", "Orange Kool-Aide*", "Orange Creamsicle*", "Orange Milkshake*", "Orange Starburst*", "Pancake", "Papaya Milkshake", "Passion Lemonade", "Passion Milkshake", "Peach Cobbler", "Peach Ice Cream", "Peach Passion", "Pear Cobbler", "Pina Colada", "Pineapple Upside-Down Cake", "Pink Lemonade", "POG (Passionfruit, Orange, Guava)", "Raspberry Lemonade", "Raspberry Milkshake", "Red Velvet Cheesecake", "Reese's Peanut Butter Cups", "Rocket Pops", "Smores", "Snickers", "Sour Apple Bubblegum*", "Strawberry Banana Daiquiri", "Strawberry Banana Milkshake", "Strawberry Bubblegum*", "Strawberry Cheesecake", "Strawberry Daiquiri", "Strawberry Donut", "Strawberry Frosted Flakes", "Strawberry Lemonade", "Strawberry Milkshake", "Strawberry Shortcake", "Strawberry Starburst", "Sugar Daddy", "Tiramisu", "Toasted Coconut", "Tootsie Rolls", "TWIX", "Twizzlers", "Watermelon Bubblegum*", "Watermelon Marshmallow", "White Rabbit Candy"]
+    }
+  ]
+}

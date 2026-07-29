@@ -1,0 +1,247 @@
+{
+  "_comment": "The 12 menus, in display order. `prefix` selects the SKU family from Products; `category` is the authoritative Airtable Category name (cross-check). `layout` picks the renderer. Header boilerplate mirrors the reference PDFs and is editable here. Prices are NEVER stored here — they come from Airtable at build time.",
+  "menus": [
+    {
+      "order": 1,
+      "slug": "glass-jars",
+      "title": "CUSTOM GLASS JARS",
+      "prefix": "GLSJAR-",
+      "category": "Glass Jars",
+      "layout": "grid",
+      "subtitle": [
+        "STICKER APPLIED TO JARS",
+        "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
+      ],
+      "includes": [
+        "PRICES SHOWN INCLUDE :",
+        "JAR, STICKER(S) & APPLICATION.",
+        "(W/O APPLICATION : - $0.10 / STICKER)"
+      ],
+      "rate_label": "RATE / STICKER",
+      "media": "MATTE / GLOSS / PAPER (3MM VINYL)",
+      "finishes": "NONE",
+      "cap_prefix": "CAP-GLSJAR-",
+      "cap_label": "RATE / JAR CAP STICKER",
+      "tab_label": "GLASS JARS"
+    },
+    {
+      "order": 2,
+      "slug": "concentrate-jars",
+      "title": "CUSTOM CONCENTRATE JARS",
+      "prefix": "CONJAR-",
+      "category": "Concentrate Jars",
+      "layout": "grid",
+      "subtitle": [
+        "STICKER APPLIED TO JARS",
+        "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
+      ],
+      "includes": [
+        "PRICES SHOWN INCLUDE :",
+        "JAR, STICKER(S) & APPLICATION.",
+        "(W/O APPLICATION : - $0.10 / STICKER)"
+      ],
+      "rate_label": "RATE / STICKER",
+      "media": "MATTE / GLOSS / PAPER (3MM VINYL)",
+      "finishes": "NONE",
+      "tab_label": "CONCENTRATE"
+    },
+    {
+      "order": 3,
+      "slug": "chubby-jars",
+      "title": "CUSTOM CHUBBY GORILLA JARS",
+      "prefix": "CHUBJAR-",
+      "category": "Chubby Gorilla Jars",
+      "layout": "grid",
+      "subtitle": [
+        "STICKER APPLIED TO JARS",
+        "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
+      ],
+      "includes": [
+        "PRICES SHOWN INCLUDE :",
+        "JAR, STICKER(S) & APPLICATION.",
+        "(W/O APPLICATION : - $0.10 / STICKER)"
+      ],
+      "rate_label": "RATE / STICKER",
+      "media": "MATTE / GLOSS / PAPER (3MM VINYL)",
+      "finishes": "NONE",
+      "cap_prefix": "CAP-CHUBJAR-",
+      "cap_label": "RATE / JAR CAP STICKER",
+      "tab_label": "CHUBBY GORILLA"
+    },
+    {
+      "order": 4,
+      "slug": "miron-jars",
+      "title": "CUSTOM MIRON JARS",
+      "prefix": "MIRON-",
+      "category": "Miron Jars",
+      "layout": "grid",
+      "subtitle": [
+        "STICKER APPLIED TO JARS",
+        "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
+      ],
+      "includes": [
+        "PRICES SHOWN INCLUDE :",
+        "JAR, STICKER(S) & APPLICATION.",
+        "(W/O APPLICATION : - $0.10 / STICKER)"
+      ],
+      "rate_label": "RATE / STICKER",
+      "media": "MATTE / GLOSS / PAPER (3MM VINYL)",
+      "finishes": "NONE",
+      "cap_prefix": "CAP-MIRON-",
+      "cap_label": "RATE / JAR CAP STICKER",
+      "tab_label": "MIRON"
+    },
+    {
+      "order": 5,
+      "slug": "mylar-bags",
+      "title": "CUSTOM MYLAR BAGS",
+      "prefix": "MYLS2B-",
+      "category": "Mylar Bags (Sticker)",
+      "layout": "grid",
+      "subtitle": [
+        "STICKER TO BAG",
+        "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
+      ],
+      "includes": [
+        "PRICES SHOWN INCLUDE :",
+        "MYLAR BAG, STICKER(S) & APPLICATION.",
+        "(W/O APPLICATION : - $0.10 / STICKER)"
+      ],
+      "rate_label": "RATE / STICKER",
+      "media": "MATTE / GLOSS",
+      "finishes": "NONE",
+      "tab_label": "MYLAR · STICKER"
+    },
+    {
+      "order": 6,
+      "slug": "direct-to-bag",
+      "title": "CUSTOM MYLAR BAGS",
+      "prefix": "MYLDTP-",
+      "category": "Mylar Bags (Direct Print)",
+      "layout": "grid",
+      "subtitle": [
+        "DIRECT TO BAG PRINT (IN-HOUSE)",
+        "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
+      ],
+      "includes": [
+        "PRICES SHOWN INCLUDE :",
+        "MYLAR BAG & PRINT."
+      ],
+      "rate_label": "RATE / BAG",
+      "media": "WHITE / BLACK MYLAR",
+      "finishes": "NONE",
+      "section_prefix": "IN-HOUSE DIRECT TO BAG PRINT",
+      "tab_label": "MYLAR · DTP"
+    },
+    {
+      "order": 7,
+      "slug": "preroll-tubes",
+      "title": "CUSTOM PRE-ROLL TUBES",
+      "prefix": "TUBE-",
+      "category": "Pre-Roll Tubes",
+      "layout": "grid",
+      "subtitle": [
+        "STICKER APPLIED TO TUBES",
+        "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
+      ],
+      "includes": [
+        "PRICES SHOWN INCLUDE :",
+        "TUBES, STICKER(S) & APPLICATION.",
+        "(W/O APPLICATION : - $0.10 / STICKER)"
+      ],
+      "rate_label": "RATE / STICKER",
+      "media": "MATTE / GLOSS",
+      "finishes": "NONE",
+      "cap_prefix": "CAP-TUBE-",
+      "cap_label": "RATE / TUBE CAP STICKER",
+      "tab_label": "PRE-ROLL"
+    },
+    {
+      "order": 8,
+      "slug": "stickers",
+      "title": "CUSTOM STICKERS",
+      "prefix": "STKR-",
+      "category": "Stickers",
+      "layout": "grid",
+      "subtitle": [
+        "STICKER BY SIZE",
+        "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
+      ],
+      "includes": [
+        "PRICES SHOWN INCLUDE :",
+        "THE STICKER(S)."
+      ],
+      "rate_label": "RATE / STICKER",
+      "media": "MATTE / GLOSS / PAPER (3MM VINYL)",
+      "finishes": "NONE",
+      "tab_label": "STICKERS"
+    },
+    {
+      "order": 9,
+      "slug": "terpenes",
+      "title": "TERPENES",
+      "prefix": "TERP-",
+      "category": "Terpenes",
+      "layout": "terpenes",
+      "subtitle": [
+        "BOTANICAL DERIVED TERPENES",
+        "STRAIN SPECIFIC"
+      ],
+      "base_sku": "TERP-BOT",
+      "blends": [
+        "TERP-SPLASH",
+        "TERP-CDT",
+        "TERP-LOUD-DANK",
+        "TERP-LOUD-SUPER"
+      ],
+      "unit_suffix": "/mL",
+      "tab_label": "TERPENES"
+    },
+    {
+      "order": 10,
+      "slug": "terpene-infusion",
+      "title": "TERPENE INFUSION",
+      "prefix": "INFUSE",
+      "category": "Terpene Infusion",
+      "layout": "infusion",
+      "service_sku": "INFUSE",
+      "rush_sku": "INFUSE-RUSH",
+      "terpene_add_per_lb": 25.75,
+      "unit_label": "lb",
+      "inquire_tier": {
+        "range": "500+",
+        "price": "INQUIRE",
+        "floor": 500
+      },
+      "tab_label": "INFUSION"
+    },
+    {
+      "order": 11,
+      "slug": "brand-development",
+      "title": "BRAND DEVELOPMENT",
+      "prefix": "DSGN-",
+      "category": "Design / Brand Dev",
+      "layout": "flat",
+      "subtitle": [
+        "DESIGN SERVICES"
+      ],
+      "design_prefix": "DSGN-",
+      "package_prefix": "PKG-",
+      "tab_label": "BRAND DEV"
+    },
+    {
+      "order": 12,
+      "slug": "o2-devices",
+      "title": "O2 VAPE DEVICES",
+      "prefix": "DEV-O2-",
+      "category": "O2 Devices",
+      "layout": "devices",
+      "subtitle": [
+        "DEVICE PRICE LIST"
+      ],
+      "wrap_prefix": "O2WRAP-",
+      "wrap_label": "RATE / CUSTOM WRAP STICKER",
+      "tab_label": "O2 DEVICES"
+    }
+  ]
+}

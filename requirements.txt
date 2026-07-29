@@ -1,0 +1,8 @@
+# Build-time only. Self-contained wheels (no system libraries needed).
+# PDF export uses a headless Chrome/Chromium already on the machine.
+pymupdf>=1.24        # rasterize reference PDFs + read built PDFs (layout tests)
+opencv-python-headless>=4.9   # optional background recovery (scripts/recover_bg.py)
+numpy>=1.26
+pillow>=10
+# Note: src/airtable.py uses only the Python stdlib (urllib) for the REST fetch,
+# so no `requests` dependency is required for a build.
