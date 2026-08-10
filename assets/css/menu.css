@@ -109,7 +109,7 @@ table.kv td.v{ text-align:right; font-weight:700; }
 
 /* ---------- index hub ---------- */
 .hubhead{ text-align:center; padding:1.2rem 1rem .5rem; }
-.hublogo{ width:clamp(9rem, 38vw, 14rem); height:auto; display:inline-block; }
+.hublogo{ width:clamp(12rem, 50vw, 19rem); height:auto; display:inline-block; }
 .tabbar{ position:sticky; top:0; z-index:5; overflow-x:auto; background:transparent;
   transition:background .25s ease;
   -webkit-overflow-scrolling:touch; scrollbar-width:none; }
