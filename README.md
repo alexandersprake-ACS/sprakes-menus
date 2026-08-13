@@ -68,11 +68,12 @@ Compares current data to `build-cache/price-snapshot.json` (updated each build).
 
 ## Publishing / indexing
 
-Menus publish with `noindex` + `Disallow` **by default** (prices not yet cleared
-for public search indexing — owner decision, 2026-07-17). To publish indexable:
+Menus publish **publicly and indexable** (owner decision, 2026-07-17).
+`config/site.json` sets `"noindex": false` and `robots.txt` allows
+crawling with a sitemap. To publish with noindex instead:
 
 ```bash
-python -m src.build --index       # or set "noindex": false in config/site.json
+python -m src.build --noindex    # or set "noindex": true in config/site.json
 ```
 
 ## Deploy (GitHub Pages)
