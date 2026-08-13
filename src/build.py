@@ -6,7 +6,7 @@ Usage:
   python -m src.build --fetch         # fetch Airtable first (needs AIRTABLE_TOKEN)
   python -m src.build --no-pdf        # skip PDF export (faster, HTML only)
   python -m src.build --diff          # print price changes vs last snapshot, then build
-  python -m src.build --index         # publish indexable (override noindex default)
+  python -m src.build --noindex       # publish with noindex (indexable is the default)
 """
 import argparse
 import datetime

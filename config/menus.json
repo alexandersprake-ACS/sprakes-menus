@@ -206,7 +206,7 @@
       "layout": "infusion",
       "service_sku": "INFUSE",
       "rush_sku": "INFUSE-RUSH",
-      "terpene_add_per_lb": 25.75,
+      "terpene_add_per_lb": 25.8,
       "unit_label": "lb",
       "inquire_tier": {
         "range": "500+",

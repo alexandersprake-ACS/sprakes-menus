@@ -63,7 +63,7 @@ def main():
     sec = mm["terpene-infusion"]["sections"][0]
     ranges = {t["range"]: t["price"] for t in sec["tiers"]}
     check("4a Infusion 1-4 = $231.75", ranges.get("1-4") == "$231.75", str(ranges.get("1-4")))
-    check("4b Infusion '+ terpenes $25.75 / LB' note", "$25.75 / LB" in hi.upper() or "$25.75 / lb" in hi.lower())
+    check("4b Infusion '+ terpenes $25.80 / LB' note", "$25.80 / LB" in hi.upper() or "$25.80 / lb" in hi.lower())
     check("4c Infusion own-terpenes line", "Service price only" in hi)
     check("4d Infusion rush = $309", sec.get("rush") == "$309" and "$309" in hi, str(sec.get("rush")))
     check("4e Infusion quantities labeled in lb", "lb" in hi and "PER LB" in hi.upper())
@@ -72,6 +72,13 @@ def main():
     check("4g Infusion 500+ = INQUIRE", ranges.get("500+") == "INQUIRE" and "INQUIRE" in hi,
           str(ranges.get("500+")))
     check("4h Infusion shows all 8 tiers", len(sec["tiers"]) == 8, f"{len(sec['tiers'])} tiers")
+    # strength options are named, with the price reassurance; the internal mL
+    # draw figures (10/20/30 mL per lb) must NEVER appear on the menu
+    check("4i Infusion strength note (no mL figures)",
+          "CHOOSE YOUR STRENGTH" in hi.upper()
+          and "same price at any strength" in hi
+          and "mL" not in sec["flavor_note"][0] + sec["flavor_note"][1],
+          str(sec.get("flavor_note")))
 
     # 5. O2 deep grid 50 -> 100,000
     ho = html("o2-devices")
