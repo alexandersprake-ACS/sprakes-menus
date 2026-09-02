@@ -84,10 +84,16 @@ def _flavors(sec):
 def _kv(sec):
     out = ['<section class="sect">']
     out.append(f'<div><span class="sechead">{e(sec["header"])}</span></div>')
+    if sec.get("note"):
+        out.append(f'<div class="subhead">{e(sec["note"])}</div>')
     out.append('<table class="kv">')
     for r in sec["rows"]:
-        out.append(f'<tr><td class="k">{e(r["label"])}</td><td class="v">{e(r["price"])}</td></tr>')
-    out.append("</table></section>")
+        sub = f'<div class="ksub">{e(r["sub"])}</div>' if r.get("sub") else ""
+        out.append(f'<tr><td class="k">{e(r["label"])}{sub}</td><td class="v">{e(r["price"])}</td></tr>')
+    out.append("</table>")
+    for line in sec.get("after") or []:
+        out.append(f'<div class="popnote">{e(line)}</div>')
+    out.append("</section>")
     return "".join(out)
 
 

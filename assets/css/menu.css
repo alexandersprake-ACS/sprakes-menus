@@ -84,6 +84,8 @@ table.kv{ width:100%; max-width:24rem; margin:.4rem auto; border-collapse:collap
 table.kv td{ padding:.4rem .2rem; border-bottom:1px dotted rgba(255,255,255,.4); }
 table.kv td.k{ text-align:left; font-weight:300; }
 table.kv td.v{ text-align:right; font-weight:700; }
+table.kv .ksub{ font-size:.62rem; font-weight:300; color:var(--faint);
+  margin-top:.15rem; line-height:1.4; }
 
 /* infusion */
 .infuse .tiers{ width:100%; max-width:22rem; margin:.6rem auto; border-collapse:collapse; font-size:.86rem; }

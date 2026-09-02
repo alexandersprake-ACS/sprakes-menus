@@ -58,6 +58,15 @@ def main():
     check("3 Design/Package flat prices", ok3,
           " ".join(f"{s}={model.money(data.ref_of(s))}" for s in want))
 
+    # 3b. Tier definitions + revision terms (Sep 1 owner rulings): the fine
+    # print is the customer-facing basis for revision enforcement — its
+    # absence creates disputes, so it is gated here.
+    need3b = ["FREE CONSULTATION", "PATTERN WORK", "Basic illustrations",
+              "Partial illustrations", "Full hand-drawn illustrations",
+              "30-day", "60-day", "inquire for pricing on larger orders"]
+    check("3b Design tier definitions + revision fine print",
+          all(x in h for x in need3b), str([x for x in need3b if x not in h]))
+
     # 4. Infusion table (split presentation)
     hi = html("terpene-infusion")
     sec = mm["terpene-infusion"]["sections"][0]

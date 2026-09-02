@@ -225,8 +225,23 @@
       "subtitle": [
         "DESIGN SERVICES"
       ],
+      "includes": [
+        "FREE CONSULTATION",
+        "EVERY TIER INCLUDES : LOGO · TYPOGRAPHY & VERBIAGE · PATTERN WORK"
+      ],
       "design_prefix": "DSGN-",
       "package_prefix": "PKG-",
+      "tier_notes": {
+        "DSGN-T1": "Basic illustrations · ~5 revisions (limited)",
+        "DSGN-T2": "Partial illustrations · Unlimited revisions*",
+        "DSGN-T3": "Full hand-drawn illustrations · Unlimited revisions*"
+      },
+      "package_note": "EACH PACKAGE = THAT TIER'S DESIGN ACROSS 5 OR 10 PRODUCTS, PLUS LOGO",
+      "package_after": [
+        "Unlimited revisions* · Tier 3 packages: 60-day revision window",
+        "Please inquire for pricing on larger orders."
+      ],
+      "fine_print": "*Unlimited revisions must be requested within a 30-day period of the latest update.",
       "tab_label": "BRAND DEV"
     },
     {

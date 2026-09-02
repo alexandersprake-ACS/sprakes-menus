@@ -13,6 +13,7 @@ Pricing shapes handled:
 """
 import json
 import os
+import re
 
 from . import airtable
 
@@ -300,13 +301,29 @@ def _infusion_menu(m, data, site, warns):
 def _flat_menu(m, data, site, warns):
     designs = data.family(m["design_prefix"])
     packages = data.family(m["package_prefix"])
-    drows = [{"label": data.name_of(s) or s, "price": money(data.ref_of(s), site["quote_text"])}
-             for s in sorted(designs, key=lambda s: float(data.ref_of(s) or 0))]
+    tier_notes = m.get("tier_notes", {})  # static tier definitions (config, not catalog)
+    drows = []
+    for s in sorted(designs, key=lambda s: float(data.ref_of(s) or 0)):
+        row = {"label": data.name_of(s) or s, "price": money(data.ref_of(s), site["quote_text"])}
+        if s in tier_notes:
+            row["sub"] = tier_notes[s]
+        drows.append(row)
+
+    def _pkg_key(sku):
+        # PKG-T{tier}-{qty}: order tiers ascending, 5-pack before 10-pack —
+        # a plain price sort interleaves tiers on equal prices
+        mt = re.match(r".*-T(\d+)-(\d+)$", sku)
+        if mt:
+            return (int(mt.group(1)), int(mt.group(2)))
+        return (99, float(data.ref_of(sku) or 0))
+
     prows = [{"label": data.name_of(s) or s, "price": money(data.ref_of(s), site["quote_text"])}
-             for s in sorted(packages, key=lambda s: float(data.ref_of(s) or 0))]
+             for s in sorted(packages, key=_pkg_key)]
     sections = [
-        {"kind": "kv", "header": "DESIGN SERVICES", "rows": drows},
-        {"kind": "kv", "header": "BRANDING PACKAGES", "rows": prows},
+        {"kind": "kv", "header": "DESIGN SERVICES", "rows": drows,
+         "after": [m["fine_print"]] if m.get("fine_print") else None},
+        {"kind": "kv", "header": "BRANDING PACKAGES", "rows": prows,
+         "note": m.get("package_note"), "after": m.get("package_after")},
     ]
     return _wrap(m, sections, site, disclaimer=False)
 
