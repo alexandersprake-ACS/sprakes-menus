@@ -53,13 +53,32 @@
       "category": "Chubby Gorilla Jars",
       "layout": "grid",
       "subtitle": [
-        "STICKER APPLIED TO JARS",
+        "JAR ALONE · JAR + CUSTOM LABEL · LABEL ONLY",
         "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
       ],
       "includes": [
-        "PRICES SHOWN INCLUDE :",
-        "JAR, STICKER(S) & APPLICATION.",
-        "(W/O APPLICATION : - $0.10 / STICKER)"
+        "EVERY CG SIZE, THREE WAYS :",
+        "THE JAR ALONE, THE JAR + YOUR CUSTOM LABEL, OR JUST THE LABEL."
+      ],
+      "pre_families": [
+        {
+          "prefix": "JAR-CG-",
+          "header": "JAR ALONE — NO PRINT",
+          "note": "ANY JAR COLOR — ONE PRICE",
+          "rate_label": "RATE / JAR"
+        }
+      ],
+      "section_prefix": "JAR + CUSTOM LABEL",
+      "family_note": "PRICES INCLUDE : JAR, STICKER(S) & APPLICATION. (W/O APPLICATION : - $0.10 / STICKER)",
+      "post_families": [
+        {
+          "prefix": "CHUBJAR-LBL-",
+          "header": "LABEL ONLY — YOU SUPPLY THE JAR",
+          "note": "THE LABEL, SIZED & PRINTED FOR YOUR CG JAR — BRING YOUR OWN JARS.",
+          "rate_label": "RATE / LABEL",
+          "media": "MATTE / GLOSS / PAPER (3MM VINYL)",
+          "finishes": "NONE"
+        }
       ],
       "rate_label": "RATE / STICKER",
       "media": "MATTE / GLOSS / PAPER (3MM VINYL)",
@@ -67,7 +86,7 @@
       "cap_prefix": "CAP-CHUBJAR-",
       "cap_label": "RATE / JAR CAP STICKER",
       "exclude_prefixes": ["CHUBJAR-LBL-"],
-      "_exclude_note": "Temporary guard (Oct 1): the 9 label-only SKUs stay off the public menu until the owner's three-way chubby restructure (Jar Alone / Bundled / Label Only) lands as its own work order — bare rows would read as cheaper jar bundles.",
+      "_exclude_note": "STRUCTURAL (Oct 1 three-way restructure): label-only SKUs are excluded from the bundled family because they render as their own 'Label Only' post_family section below it.",
       "tab_label": "CHUBBY GORILLA"
     },
     {

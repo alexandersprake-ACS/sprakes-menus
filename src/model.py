@@ -117,6 +117,55 @@ class Data:
         return sorted(s)
 
 
+def _family_section(fam, data, site):
+    """One self-contained grid section for a sub-family (e.g. the chubby
+    three-way's 'Jar Alone' and 'Label Only' blocks). Untiered families list
+    sizes; tiered ones list tier-major rows ('Standard · 2oz'). Prices are
+    100%% base-derived, like every grid."""
+    skus = data.family(fam["prefix"])
+    if not skus:
+        raise SystemExit(f"FATAL: sub-family '{fam['prefix']}' has zero products.")
+    cols = data.qtys(skus)
+    popular = site.get("popular_quantity")
+    tiered = any(data.tier_of(s) in PRINT_TIERS for s in skus)
+
+    def cells_for(sku):
+        br = data.breaks.get(sku, {})
+        out = []
+        for q in cols:
+            if q in br:
+                out.append(money(br[q], site["quote_text"]))
+            elif not br and q == cols[0]:
+                out.append(money(data.ref_of(sku), site["quote_text"]))
+            else:
+                out.append("—")
+        return out
+
+    rows = []
+    if tiered:
+        order = sorted(skus, key=lambda s: (TIER_ORDER.get(data.tier_of(s), 5),
+                                            float(data.ref_of(s) or 0), s))
+        for sku in order:
+            rows.append({"label": f"{data.tier_of(sku)} · {data.size_of(sku)}",
+                         "cells": cells_for(sku)})
+    else:
+        for sku in sorted(skus, key=lambda s: (float(data.ref_of(s) or 0), s)):
+            rows.append({"label": data.size_of(sku) or data.name_of(sku) or sku,
+                         "cells": cells_for(sku)})
+
+    note = fam.get("note", "")
+    if 1 in cols:  # singles tier: surface the walk-in hook, price base-derived
+        min1 = min(data.breaks[s][1] for s in skus if 1 in data.breaks.get(s, {}))
+        note = (note + " · " if note else "") + f"SINGLES FROM {money(min1, site['quote_text'])}"
+    return {
+        "kind": "grid", "header": fam["header"], "variant_note": note or None,
+        "rate_label": fam.get("rate_label"), "media": fam.get("media"),
+        "finishes": fam.get("finishes"),
+        "columns": [{"qty": q, "label": _qty_label(q), "popular": q == popular} for q in cols],
+        "rows": rows,
+    }
+
+
 # --------------------------------------------------------------------------
 def _grid_menu(m, data, site, warns):
     prefix = m["prefix"]
@@ -168,10 +217,24 @@ def _grid_menu(m, data, site, warns):
             "rows": rows,
         })
 
+    # group-level note on the first tier section (e.g. what bundled prices include)
+    if sections and m.get("family_note"):
+        sections[0]["group_note"] = m["family_note"]
+
     # print-tier definitions, once per page, directly above the tier sections —
     # only when this page's products actually carry S/P/C tiers
     if PRINT_TIERS & set(groups):
         sections.insert(0, _tierdefs_section(m))
+
+    # untiered pre-families (e.g. 'Jar Alone') sit ABOVE the tier definitions:
+    # the block must not govern them
+    for fam in reversed(m.get("pre_families", [])):
+        sections.insert(0, _family_section(fam, data, site))
+
+    # tiered post-families (e.g. 'Label Only') sit below the main tier
+    # sections, still under the tier-definitions block
+    for fam in m.get("post_families", []):
+        sections.append(_family_section(fam, data, site))
 
     # optional cap-sticker add-on table (tier rows)
     if cap_prefix:
@@ -362,7 +425,7 @@ def _wrap(m, sections, site, disclaimer):
 
 
 def _qty_label(q):
-    return f"{q:,}"
+    return "EACH" if q == 1 else f"{q:,}"
 
 
 def _ml(q):

@@ -24,6 +24,8 @@ def _grid(sec):
     cols = sec["columns"]
     out = ['<section class="sect">']
     out.append(f'<div><span class="sechead">{e(sec["header"])}</span></div>')
+    if sec.get("group_note"):
+        out.append(f'<div class="subhead">{e(sec["group_note"])}</div>')
     if sec.get("variant_note"):
         out.append(f'<div class="subhead">{e(sec["variant_note"])}</div>')
     if sec.get("media"):

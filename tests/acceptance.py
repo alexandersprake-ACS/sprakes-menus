@@ -167,6 +167,33 @@ def main():
             bad10.append(f"{mc['slug']}: tiered={tiered} rendered={present}")
     check("10 print-tier definitions on tiered pages only", not bad10, "; ".join(bad10))
 
+    # 11. Chubby three-way restructure (Oct 1 rulings): Jar Alone (untiered,
+    # ABOVE the tier-definitions block) -> tier definitions -> bundled ->
+    # Label Only. Equalized 2OZBLK curves must match the clear curves, and the
+    # three-way sections must exist on no other page.
+    hc = html("chubby-jars")
+    i_jar = hc.find("JAR ALONE — NO PRINT")
+    i_defs = hc.find("WHAT THE TIERS MEAN")  # block START, so the jar-alone
+    # slice ends before the definitions' own tier-name text
+    i_bund = hc.find("JAR + CUSTOM LABEL — STANDARD")
+    i_lbl = hc.find("LABEL ONLY — YOU SUPPLY THE JAR")
+    order_ok = -1 < i_jar < i_defs < i_bund < i_lbl
+    jar_slice = hc[i_jar:i_defs] if order_ok else ""
+    untiered_ok = order_ok and not any(t in jar_slice for t in
+                                       ("Standard", "Premium", "Connoisseur", "STD", "PRM", "CNSR"))
+    defs_once = hc.count("no finish layers") == 1
+    singles_ok = "EACH" in hc and "SINGLES FROM $1.55" in hc
+    eq_ok = all(data.breaks.get(f"CHUBJAR-{t}-2OZBLK") == data.breaks.get(f"CHUBJAR-{t}-2OZCLR")
+                for t in ("STD", "PRM", "CNSR"))
+    std500 = [data.breaks["CHUBJAR-STD-2OZBLK"].get(q) for q in (500, 1000, 5000, 10000)]
+    eq_vals_ok = std500 == [1.18, 0.98, 0.88, 0.82]
+    leak = [mc["slug"] for mc in menus_cfg if mc["slug"] != "chubby-jars"
+            and ("JAR ALONE" in html(mc["slug"]) or "YOU SUPPLY THE JAR" in html(mc["slug"]))]
+    check("11 chubby three-way (order/untiered/defs-once/singles/equalized/contained)",
+          order_ok and untiered_ok and defs_once and singles_ok and eq_ok and eq_vals_ok and not leak,
+          f"order={order_ok} untiered={untiered_ok} once={defs_once} singles={singles_ok} "
+          f"eq={eq_ok} std500+={std500} leak={leak}")
+
     # ---- report ----
     print("\n=== §8 ACCEPTANCE ===")
     req_fail = 0
