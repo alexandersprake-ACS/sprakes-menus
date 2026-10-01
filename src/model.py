@@ -121,7 +121,7 @@ class Data:
 def _grid_menu(m, data, site, warns):
     prefix = m["prefix"]
     cap_prefix = m.get("cap_prefix")
-    exclude = (cap_prefix,) if cap_prefix else ()
+    exclude = tuple(m.get("exclude_prefixes", [])) + ((cap_prefix,) if cap_prefix else ())
     skus = data.family(prefix, exclude=exclude)
     if not skus:
         raise SystemExit(f"FATAL: menu '{m['slug']}' family '{prefix}' has zero products.")

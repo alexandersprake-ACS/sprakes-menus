@@ -66,6 +66,8 @@
       "finishes": "NONE",
       "cap_prefix": "CAP-CHUBJAR-",
       "cap_label": "RATE / JAR CAP STICKER",
+      "exclude_prefixes": ["CHUBJAR-LBL-"],
+      "_exclude_note": "Temporary guard (Oct 1): the 9 label-only SKUs stay off the public menu until the owner's three-way chubby restructure (Jar Alone / Bundled / Label Only) lands as its own work order — bare rows would read as cheaper jar bundles.",
       "tab_label": "CHUBBY GORILLA"
     },
     {
