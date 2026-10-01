@@ -8,5 +8,15 @@
   "infusion_notes": {
     "own_terpenes": "Using your own terpenes? Service price only.",
     "flavor_note": ["CHOOSE YOUR STRENGTH:", "Light, Medium, or Heavy — same price at any strength."]
+  },
+  "print_tiers": {
+    "_comment": "Owner ruling Sep 30, 2026 — the three definitions are VERBATIM (incl. 'colour'); do not rephrase. Rendered once on every menu whose products carry Standard/Premium/Connoisseur tiers (auto-detected in src/model.py). The lead line is adaptable per menu via print_tiers_lead in menus.json.",
+    "heading": "WHAT THE TIERS MEAN",
+    "lead": "All tiers use the same container — the tier is the label:",
+    "tiers": [
+      ["Standard", "regular white vinyl, colour print, no finish layers."],
+      ["Premium", "regular white vinyl, colour print, single spot-UV layer (gloss or matte) plus white-ink layer."],
+      ["Connoisseur", "specialty vinyl (flaked / frosted / rainbow holographic), colour print, white layer, raised spot-UV (gloss or matte)."]
+    ]
   }
 }

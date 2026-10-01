@@ -20,6 +20,19 @@ from . import airtable
 CFG = os.path.join(os.path.dirname(__file__), "..", "config")
 TIER_ORDER = {"Standard": 0, "Premium": 1, "Connoisseur": 2, "N/A": 9, None: 9}
 TIER_ABBR = {"Standard": "STD", "Premium": "PRM", "Connoisseur": "CNSR"}
+PRINT_TIERS = {"Standard", "Premium", "Connoisseur"}
+
+
+def _tierdefs_section(m):
+    """The Sep 30 print-tier definitions block (verbatim owner ruling).
+
+    Shared copy lives in config/disclaimers.json; menus may override the lead
+    line (print_tiers_lead). Inserted once per page, only when the page's
+    products actually carry Standard/Premium/Connoisseur tiers.
+    """
+    pt = _load_json("disclaimers.json")["print_tiers"]
+    return {"kind": "tierdefs", "heading": pt["heading"],
+            "lead": m.get("print_tiers_lead") or pt["lead"], "tiers": pt["tiers"]}
 
 
 def _load_json(name):
@@ -155,6 +168,11 @@ def _grid_menu(m, data, site, warns):
             "rows": rows,
         })
 
+    # print-tier definitions, once per page, directly above the tier sections —
+    # only when this page's products actually carry S/P/C tiers
+    if PRINT_TIERS & set(groups):
+        sections.insert(0, _tierdefs_section(m))
+
     # optional cap-sticker add-on table (tier rows)
     if cap_prefix:
         caps = data.family(cap_prefix)
@@ -206,6 +224,10 @@ def _devices_menu(m, data, site, warns):
                 br = data.breaks.get(sku, {})
                 cells = [money(br[q], site["quote_text"]) if q in br else money(data.ref_of(sku), site["quote_text"]) if not br else "—" for q in wcols]
                 wrows.append({"label": TIER_ABBR.get(data.tier_of(sku), ""), "cells": cells})
+            # the wrap rows are the tiered product here — definitions sit
+            # directly above them
+            if PRINT_TIERS & {data.tier_of(s) for s in wraps}:
+                sections.append(_tierdefs_section(m))
             sections.append({
                 "kind": "grid", "header": m.get("wrap_label", "RATE / WRAP"), "compact": True,
                 "rate_label": None, "media": None, "finishes": None,

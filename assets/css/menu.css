@@ -102,6 +102,14 @@ table.kv .ksub{ font-size:.62rem; font-weight:300; color:var(--faint);
 .infuse .rush{ font-weight:300; font-size:.82rem; margin-top:.9rem; }
 .infuse .rush b{ font-weight:700; }
 
+/* print-tier definitions (Sep 30 ruling) — compact, once per tiered page */
+.tierdefs{ max-width:26rem; margin:1.3rem auto 1.1rem; break-inside:avoid; }
+.tierdefs .tdh{ font-weight:700; letter-spacing:.2em; font-size:.76rem; }
+.tierdefs .tdlead{ font-weight:300; font-size:.68rem; color:var(--muted); margin:.35rem 0 .5rem; }
+.tierdefs .tdline{ text-align:left; font-weight:300; font-size:.66rem; line-height:1.55;
+  margin:.28rem 0; padding-left:.9em; text-indent:-.9em; color:#e8e2f5; }
+.tierdefs .tdline b{ font-weight:600; color:var(--ink); }
+
 .disclaimer{ margin-top:1.8rem; text-align:left; break-inside:avoid; }
 .disclaimer .dh{ font-weight:700; font-size:.66rem; letter-spacing:.04em; }
 .disclaimer .dp{ font-weight:300; font-size:.58rem; color:var(--faint); margin-top:.4rem; line-height:1.55; }

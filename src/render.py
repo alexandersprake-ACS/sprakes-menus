@@ -118,7 +118,18 @@ def _infusion(sec):
     return "".join(out)
 
 
-RENDERERS = {"grid": _grid, "schedule": _schedule, "flavors": _flavors, "kv": _kv, "infusion": _infusion}
+def _tierdefs(sec):
+    out = ['<section class="sect tierdefs">']
+    out.append(f'<div class="tdh">{e(sec["heading"])}</div>')
+    out.append(f'<div class="tdlead">{e(sec["lead"])}</div>')
+    for name, desc in sec["tiers"]:
+        out.append(f'<div class="tdline"><b>{e(name)}</b> — {e(desc)}</div>')
+    out.append("</section>")
+    return "".join(out)
+
+
+RENDERERS = {"grid": _grid, "schedule": _schedule, "flavors": _flavors, "kv": _kv,
+             "infusion": _infusion, "tierdefs": _tierdefs}
 
 
 def render_menu_body(model, site, build_date):

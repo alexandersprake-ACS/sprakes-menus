@@ -147,6 +147,24 @@ def main():
     pdf_ok = all(date in pdf_text(m["slug"]) for m in models)
     check("9 build date on every page + PDF", html_ok and pdf_ok, f"html={html_ok} pdf={pdf_ok}")
 
+    # 10. Print-tier definitions (Sep 30 owner ruling): the block renders on
+    # every page whose products (incl. cap/wrap add-ons) carry Standard/
+    # Premium/Connoisseur tiers, and on NONE of the others. Tieredness is
+    # derived from the live data, not a hardcoded page list.
+    menus_cfg = json.load(open(os.path.join(ROOT, "config", "menus.json"), encoding="utf-8"))["menus"]
+    marker = "no finish layers"  # verbatim from the ruling
+    bad10 = []
+    for mc in menus_cfg:
+        tiers = set()
+        for p in (mc.get("prefix"), mc.get("cap_prefix"), mc.get("wrap_prefix")):
+            if p:
+                tiers |= {data.tier_of(s) for s in data.family(p)}
+        tiered = bool(tiers & {"Standard", "Premium", "Connoisseur"})
+        present = marker in html(mc["slug"])
+        if tiered != present:
+            bad10.append(f"{mc['slug']}: tiered={tiered} rendered={present}")
+    check("10 print-tier definitions on tiered pages only", not bad10, "; ".join(bad10))
+
     # ---- report ----
     print("\n=== §8 ACCEPTANCE ===")
     req_fail = 0
