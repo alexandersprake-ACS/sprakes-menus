@@ -105,10 +105,12 @@ def main():
     check("6b Terpenes flavors from marketing list only", internal_only not in ht.upper(),
           "internal SKU token leaked" if internal_only in ht.upper() else "clean")
 
-    # 6c. Marketing flavor list: confirmed counts (owner sign-off 2026-07-17)
+    # 6c. Marketing flavor list: confirmed counts (owner sign-offs 2026-07-17
+    # and 2026-09-30: +77 reconciled base flavors; the five spec-5.3 pair-names
+    # are deliberately withheld from the customer menu)
     counts = {g["name"]: len(g["flavors"]) for g in flavors_cfg["groups"]}
-    want_counts = {"FRUIT": 21, "CANDY": 30, "EXPANDED FLAVORS": 118}
-    check("6c Flavor group counts 21/30/118", counts == want_counts, str(counts))
+    want_counts = {"FRUIT": 45, "CANDY": 46, "EXPANDED FLAVORS": 155}
+    check("6c Flavor group counts 45/46/155", counts == want_counts, str(counts))
 
     # 6d. Verbatim spellings preserved (intentional; never normalized) on BOTH
     # flavor-bearing menus.
