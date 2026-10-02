@@ -166,8 +166,83 @@ def _family_section(fam, data, site):
     }
 
 
+def _consolidated_sections(m, data, site):
+    """Owner's consolidated shape (Oct 1 v2 feedback): one table per PRINT
+    tier, each row a size x way trio (e.g. '2oz — Jar alone / Jar + label /
+    Label only'). Untiered ways repeat identically in every tier table.
+    Variants of a size (black/clear) auto-collapse into one row while their
+    break curves are identical — if a reprice ever un-equalizes them, the
+    rows split again on the next regeneration. Reusable via the
+    `consolidated_ways` config key (Miron is next in line)."""
+    cfg = m["consolidated_ways"]
+    ways = []
+    all_skus = []
+    for w in cfg["ways"]:
+        skus = data.family(w["prefix"], exclude=tuple(w.get("exclude", [])))
+        if not skus:
+            raise SystemExit(f"FATAL: consolidated way '{w['prefix']}' has zero products.")
+        ways.append({**w, "skus": skus})
+        all_skus += skus
+    cols = data.qtys(all_skus)
+    popular = site.get("popular_quantity")
+
+    def size_of(sku):
+        sz = (data.size_of(sku) or "").split(" / ")[0]
+        base = sz.split(" (")[0].strip()
+        variant = sz[len(base):].strip()
+        return base, variant
+
+    def size_sort(k):
+        mt = re.match(r"([\d.]+)", k)
+        return float(mt.group(1)) if mt else 999
+
+    def cells(br):
+        return [money(br[q], site["quote_text"]) if q in br else "—" for q in cols]
+
+    sizes = sorted({size_of(s)[0] for w in ways for s in w["skus"]}, key=size_sort)
+    sections = []
+    for tier in ("Standard", "Premium", "Connoisseur"):
+        rows = []
+        for size in sizes:
+            for w in ways:
+                cand = [s for s in w["skus"] if size_of(s)[0] == size
+                        and (w.get("untiered") or data.tier_of(s) == tier)]
+                if not cand:
+                    continue
+                curves = {tuple(sorted(data.breaks.get(s, {}).items())) for s in cand}
+                if len(curves) == 1:
+                    rows.append({"label": f"{size} — {w['label']}",
+                                 "cells": cells(data.breaks.get(cand[0], {}))})
+                else:
+                    for s in sorted(cand):
+                        _, variant = size_of(s)
+                        lbl = f"{size} {variant} — {w['label']}".replace("  ", " ")
+                        rows.append({"label": lbl, "cells": cells(data.breaks.get(s, {}))})
+        sections.append({
+            "kind": "grid", "header": tier.upper(),
+            "rate_label": m.get("rate_label"), "media": None, "finishes": None,
+            "columns": [{"qty": q, "label": _qty_label(q), "popular": q == popular} for q in cols],
+            "rows": rows,
+        })
+
+    # ways legend under the last table; {SINGLES} resolves from the base so the
+    # walk-in hook can never go stale
+    singles_vals = [data.breaks[s][1] for w in ways if w.get("untiered")
+                    for s in w["skus"] if 1 in data.breaks.get(s, {})]
+    singles = money(min(singles_vals), site["quote_text"]) if singles_vals else ""
+    legend = [l.replace("{SINGLES}", singles) for l in cfg.get("legend", [])]
+    if legend:
+        sections[-1]["after"] = legend
+    return sections
+
+
 # --------------------------------------------------------------------------
 def _grid_menu(m, data, site, warns):
+    if m.get("consolidated_ways"):
+        sections = _consolidated_sections(m, data, site)
+        sections.insert(0, _tierdefs_section(m))
+        return _finish_grid(m, data, site, sections)
+
     prefix = m["prefix"]
     cap_prefix = m.get("cap_prefix")
     exclude = tuple(m.get("exclude_prefixes", [])) + ((cap_prefix,) if cap_prefix else ())
@@ -236,7 +311,13 @@ def _grid_menu(m, data, site, warns):
     for fam in m.get("post_families", []):
         sections.append(_family_section(fam, data, site))
 
-    # optional cap-sticker add-on table (tier rows)
+    return _finish_grid(m, data, site, sections)
+
+
+def _finish_grid(m, data, site, sections):
+    """Shared grid tail: optional cap-sticker add-on table, then wrap."""
+    popular = site.get("popular_quantity")
+    cap_prefix = m.get("cap_prefix")
     if cap_prefix:
         caps = data.family(cap_prefix)
         if caps:

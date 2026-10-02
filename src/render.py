@@ -50,6 +50,8 @@ def _grid(sec):
     out.append("</tbody></table></div>")
     if any(c.get("popular") for c in cols):
         out.append(f'<div class="popnote"><span class="s">{STAR}</span> most popular quantity</div>')
+    for line in sec.get("after") or []:
+        out.append(f'<div class="popnote">{e(line)}</div>')
     out.append("</section>")
     return "".join(out)
 
