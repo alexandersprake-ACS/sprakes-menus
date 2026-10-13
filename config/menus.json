@@ -13,16 +13,18 @@
         "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
       ],
       "includes": [
-        "PRICES SHOWN INCLUDE :",
-        "JAR, STICKER(S) & APPLICATION.",
-        "(W/O APPLICATION : - $0.10 / STICKER)"
+        "FULLY-DRESSED PRICING :",
+        "JAR + BODY LABEL + CAP TOP + CAP WRAP — UP TO 3 STICKERS.",
+        "APPLICATION — $0.35 PER STICKER APPLIED. APPLY YOUR OWN? NO FEE."
       ],
-      "rate_label": "RATE / STICKER",
+      "rate_label": "RATE / DRESSED JAR",
       "media": "MATTE / GLOSS / PAPER (3MM VINYL)",
       "finishes": "NONE",
-      "cap_prefix": "CAP-GLSJAR-",
-      "cap_label": "RATE / JAR CAP STICKER",
-      "tab_label": "GLASS JARS"
+      "tab_label": "GLASS JARS",
+      "dressed_components": [
+        "CAP-GLSJAR-",
+        "CAPW-GLSJAR-"
+      ]
     },
     {
       "order": 2,
@@ -36,14 +38,18 @@
         "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
       ],
       "includes": [
-        "PRICES SHOWN INCLUDE :",
-        "JAR, STICKER(S) & APPLICATION.",
-        "(W/O APPLICATION : - $0.10 / STICKER)"
+        "FULLY-DRESSED PRICING :",
+        "JAR + BODY LABEL + CAP TOP + CAP WRAP — UP TO 3 STICKERS.",
+        "APPLICATION — $0.35 PER STICKER APPLIED. APPLY YOUR OWN? NO FEE."
       ],
-      "rate_label": "RATE / STICKER",
+      "rate_label": "RATE / DRESSED JAR",
       "media": "MATTE / GLOSS / PAPER (3MM VINYL)",
       "finishes": "NONE",
-      "tab_label": "CONCENTRATE"
+      "tab_label": "CONCENTRATE",
+      "dressed_components": [
+        "CAP-CONJAR-",
+        "CAPW-CONJAR-"
+      ]
     },
     {
       "order": 3,
@@ -63,21 +69,37 @@
       "consolidated_ways": {
         "_comment": "Owner's Oct 1 v2 consolidation: one table per tier, each row a size x way trio. Untiered ways repeat in every table; same-curve variants (2oz black/clear) auto-collapse into one row. Reusable shape — Miron gets this layout when its price file arrives.",
         "ways": [
-          { "label": "Jar alone", "prefix": "JAR-CG-", "untiered": true },
-          { "label": "Jar + label", "prefix": "CHUBJAR-", "exclude": ["CHUBJAR-LBL-"] },
-          { "label": "Label only", "prefix": "CHUBJAR-LBL-" }
+          {
+            "label": "Jar alone",
+            "prefix": "JAR-CG-",
+            "untiered": true
+          },
+          {
+            "label": "Jar + label",
+            "prefix": "CHUBJAR-",
+            "exclude": [
+              "CHUBJAR-LBL-"
+            ],
+            "dressed_components": [
+              "CAP-CHUBJAR-",
+              "CAPW-CHUBJAR-"
+            ]
+          },
+          {
+            "label": "Label only",
+            "prefix": "CHUBJAR-LBL-"
+          }
         ],
         "legend": [
           "JAR ALONE — any jar color, one price, untiered · SINGLES FROM {SINGLES}",
-          "JAR + LABEL — prices include jar, sticker(s) & application. (W/O APPLICATION : - $0.10 / STICKER) · 2oz in black or clear",
+          "JAR + LABEL — fully dressed: jar + body label + cap top + cap wrap (up to 3 stickers) · 2oz in black or clear",
           "LABEL ONLY — sized & printed for your CG jar. Bring your own jars.",
+          "APPLICATION — $0.35 PER STICKER APPLIED. APPLY YOUR OWN? NO FEE.",
           "MEDIA : MATTE / GLOSS / PAPER (3MM VINYL) · FINISHES : NONE"
         ]
       },
       "print_tiers_lead": "All tiers use the same container — the tier is the label. Jar-alone rows are untiered: same price in every table.",
       "rate_label": "RATE / PIECE",
-      "cap_prefix": "CAP-CHUBJAR-",
-      "cap_label": "RATE / JAR CAP STICKER",
       "tab_label": "CHUBBY GORILLA"
     },
     {
@@ -88,22 +110,51 @@
       "category": "Miron Jars",
       "layout": "grid",
       "subtitle": [
-        "STICKER APPLIED TO JARS",
+        "JAR ALONE · JAR + CUSTOM LABEL · LABEL ONLY",
         "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
       ],
       "includes": [
-        "PRICES SHOWN INCLUDE :",
-        "JAR, STICKER(S) & APPLICATION.",
-        "(W/O APPLICATION : - $0.10 / STICKER)"
+        "EVERY MIRON SIZE, THREE WAYS :",
+        "THE JAR ALONE, THE JAR + YOUR CUSTOM LABEL, OR JUST THE LABEL."
       ],
-      "rate_label": "RATE / STICKER",
+      "rate_label": "RATE / PIECE",
       "media": "MATTE / GLOSS / PAPER (3MM VINYL)",
       "finishes": "NONE",
-      "cap_prefix": "CAP-MIRON-",
-      "cap_label": "RATE / JAR CAP STICKER",
-      "exclude_prefixes": ["MIRON-LBL-"],
-      "_exclude_note": "Temporary until the component restructure pass (Owner-signed Oct 12, 2026): label-only Miron SKUs would render as bare rows reading like cheaper jar bundles — same failure the CHUBJAR-LBL leak had on Oct 1. The Miron three-way work order un-hides them properly.",
-      "tab_label": "MIRON"
+      "tab_label": "MIRON",
+      "consolidated_ways": {
+        "_comment": "Oct 12 component restructure: same trio layout the Owner approved on chubby v2. sku_suffix matching joins MIRON-{tier}-X / MIRON-LBL-{tier}-X / JAR-MIRON-X. Bundle way renders FULLY-DRESSED (bundle + cap top + cap wrap).",
+        "match": "sku_suffix",
+        "ways": [
+          {
+            "label": "Jar alone",
+            "prefix": "JAR-MIRON-",
+            "untiered": true
+          },
+          {
+            "label": "Jar + label",
+            "prefix": "MIRON-",
+            "exclude": [
+              "MIRON-LBL-"
+            ],
+            "dressed_components": [
+              "CAP-MIRON-",
+              "CAPW-MIRON-"
+            ]
+          },
+          {
+            "label": "Label only",
+            "prefix": "MIRON-LBL-"
+          }
+        ],
+        "legend": [
+          "JAR ALONE — violet glass, no print, untiered · SINGLES FROM {SINGLES}",
+          "JAR + LABEL — fully dressed: jar + body label + cap top + cap wrap (up to 3 stickers)",
+          "LABEL ONLY — sized & printed for your Miron jar. Bring your own jars.",
+          "APPLICATION — $0.35 PER STICKER APPLIED. APPLY YOUR OWN? NO FEE.",
+          "MEDIA : MATTE / GLOSS / PAPER (3MM VINYL) · FINISHES : NONE"
+        ]
+      },
+      "print_tiers_lead": "All tiers use the same container — the tier is the label. Jar-alone rows are untiered: same price in every table."
     },
     {
       "order": 5,
@@ -117,14 +168,18 @@
         "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
       ],
       "includes": [
-        "PRICES SHOWN INCLUDE :",
-        "MYLAR BAG, STICKER(S) & APPLICATION.",
-        "(W/O APPLICATION : - $0.10 / STICKER)"
+        "FULLY-DRESSED PRICING :",
+        "BAG + STICKER(S) — SINGLE-SIDED = 1 STICKER · DOUBLE-SIDED = 2 STICKERS.",
+        "APPLICATION — $0.35 PER STICKER APPLIED. APPLY YOUR OWN? NO FEE."
       ],
       "rate_label": "RATE / STICKER",
       "media": "MATTE / GLOSS",
       "finishes": "NONE",
-      "tab_label": "MYLAR · STICKER"
+      "tab_label": "MYLAR · STICKER",
+      "label_map": {
+        "Single-sided": "Single-sided · 1 sticker",
+        "Double-sided": "Double-sided · 2 stickers"
+      }
     },
     {
       "order": 6,
@@ -159,16 +214,17 @@
         "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
       ],
       "includes": [
-        "PRICES SHOWN INCLUDE :",
-        "TUBES, STICKER(S) & APPLICATION.",
-        "(W/O APPLICATION : - $0.10 / STICKER)"
+        "FULLY-DRESSED PRICING :",
+        "TUBE + BODY LABEL + CAP STICKER — UP TO 2 STICKERS.",
+        "APPLICATION — $0.35 PER STICKER APPLIED. APPLY YOUR OWN? NO FEE."
       ],
-      "rate_label": "RATE / STICKER",
+      "rate_label": "RATE / DRESSED TUBE",
       "media": "MATTE / GLOSS",
       "finishes": "NONE",
-      "cap_prefix": "CAP-TUBE-",
-      "cap_label": "RATE / TUBE CAP STICKER",
-      "tab_label": "PRE-ROLL"
+      "tab_label": "PRE-ROLL",
+      "dressed_components": [
+        "CAP-TUBE-"
+      ]
     },
     {
       "order": 8,
@@ -271,7 +327,19 @@
       ],
       "wrap_prefix": "O2WRAP-",
       "wrap_label": "RATE / CUSTOM WRAP STICKER",
-      "tab_label": "O2 DEVICES"
+      "tab_label": "O2 DEVICES",
+      "includes": [
+        "APPLICATION — $0.35 PER STICKER APPLIED. APPLY YOUR OWN? NO FEE.",
+        "WRAPS : 1 STICKER · BOXES : 2–5 STICKERS BY SHAPE."
+      ],
+      "post_families": [
+        {
+          "prefix": "BOXSTKR-",
+          "header": "BOX STICKERS",
+          "note": "CARTRIDGE · DISPLAY · MASTER — TOP / SIDE / WRAP BY SHAPE",
+          "rate_label": "RATE / STICKER"
+        }
+      ]
     }
   ]
 }

@@ -166,6 +166,30 @@ def _family_section(fam, data, site):
     }
 
 
+def _dressed_breaks(data, sku, component_prefixes):
+    """FULLY-DRESSED price ladder (Owner's Component Architecture, Oct 12):
+    bundle + every cap/wrap sticker the container takes, summed at the SAME
+    break. Component SKU = prefix + the bundle's tier abbreviation. A break
+    where any component is missing yields no dressed price (em-dash) rather
+    than a silently partial sum. Purely base-derived."""
+    base = data.breaks.get(sku, {})
+    abbr = TIER_ABBR.get(data.tier_of(sku))
+    if not abbr:
+        return base
+    out = {}
+    for q, p in base.items():
+        total = p
+        for pref in component_prefixes:
+            cp = data.breaks.get(pref + abbr, {}).get(q)
+            if cp is None:
+                total = None
+                break
+            total += cp
+        if total is not None:
+            out[q] = round(total + 1e-9, 2)
+    return out
+
+
 def _consolidated_sections(m, data, site):
     """Owner's consolidated shape (Oct 1 v2 feedback): one table per PRINT
     tier, each row a size x way trio (e.g. '2oz — Jar alone / Jar + label /
@@ -196,28 +220,74 @@ def _consolidated_sections(m, data, site):
         mt = re.match(r"([\d.]+)", k)
         return float(mt.group(1)) if mt else 999
 
+    def way_breaks(w, sku):
+        if w.get("dressed_components"):
+            return _dressed_breaks(data, sku, w["dressed_components"])
+        return data.breaks.get(sku, {})
+
     def cells(br):
         return [money(br[q], site["quote_text"]) if q in br else "—" for q in cols]
 
-    sizes = sorted({size_of(s)[0] for w in ways for s in w["skus"]}, key=size_sort)
+    # Two matching modes: "size" groups ways by the Size/Type string (chubby);
+    # "sku_suffix" groups by the SKU tail after way-prefix + tier segment
+    # (miron: MIRON-STD-SAT-100 / MIRON-LBL-STD-SAT-100 / JAR-MIRON-SAT-100
+    # all key to SAT-100 even though their Size/Type strings differ).
+    if cfg.get("match") == "sku_suffix":
+        seg = {"Standard": "STD-", "Premium": "PRM-", "Connoisseur": "CNSR-"}
+
+        def key_of(w, sku):
+            tail = sku[len(w["prefix"]):]
+            if not w.get("untiered"):
+                for sg in seg.values():
+                    if tail.startswith(sg):
+                        tail = tail[len(sg):]
+                        break
+            return tail
+
+        display, sortkey = {}, {}
+        for w in ways:
+            for sku in w["skus"]:
+                k = key_of(w, sku)
+                rp = float(data.ref_of(sku) or 0)
+                if w.get("untiered"):
+                    # jar-alone price anchors the ordering (small -> large);
+                    # sizes with no jar-alone (big bundle-only formats) sort last
+                    sortkey[k] = min(sortkey.get(k, 1e9), rp)
+                else:
+                    sortkey.setdefault(k, 1000 + rp)
+                    display[k] = size_of(sku)[0] or k  # tiered ways name the size
+                display.setdefault(k, size_of(sku)[0] or k)
+        sizes = sorted(display, key=lambda k: sortkey[k])
+
+        def cands(w, key, tier):
+            return [s for s in w["skus"] if key_of(w, s) == key
+                    and (w.get("untiered") or data.tier_of(s) == tier)]
+        size_name = lambda k: display[k]
+    else:
+        sizes = sorted({size_of(s)[0] for w in ways for s in w["skus"]}, key=size_sort)
+
+        def cands(w, key, tier):
+            return [s for s in w["skus"] if size_of(s)[0] == key
+                    and (w.get("untiered") or data.tier_of(s) == tier)]
+        size_name = lambda k: k
+
     sections = []
     for tier in ("Standard", "Premium", "Connoisseur"):
         rows = []
         for size in sizes:
             for w in ways:
-                cand = [s for s in w["skus"] if size_of(s)[0] == size
-                        and (w.get("untiered") or data.tier_of(s) == tier)]
+                cand = cands(w, size, tier)
                 if not cand:
                     continue
-                curves = {tuple(sorted(data.breaks.get(s, {}).items())) for s in cand}
+                curves = {tuple(sorted(way_breaks(w, s).items())) for s in cand}
                 if len(curves) == 1:
-                    rows.append({"label": f"{size} — {w['label']}",
-                                 "cells": cells(data.breaks.get(cand[0], {}))})
+                    rows.append({"label": f"{size_name(size)} — {w['label']}",
+                                 "cells": cells(way_breaks(w, cand[0]))})
                 else:
                     for s in sorted(cand):
                         _, variant = size_of(s)
-                        lbl = f"{size} {variant} — {w['label']}".replace("  ", " ")
-                        rows.append({"label": lbl, "cells": cells(data.breaks.get(s, {}))})
+                        lbl = f"{size_name(size)} {variant} — {w['label']}".replace("  ", " ")
+                        rows.append({"label": lbl, "cells": cells(way_breaks(w, s))})
         sections.append({
             "kind": "grid", "header": tier.upper(),
             "rate_label": m.get("rate_label"), "media": None, "finishes": None,
@@ -258,11 +328,13 @@ def _grid_menu(m, data, site, warns):
     for sku in skus:
         groups.setdefault(data.tier_of(sku), []).append(sku)
 
+    dressed = m.get("dressed_components")
+    label_map = m.get("label_map", {})
     sections = []
     for tier in sorted(groups, key=lambda t: TIER_ORDER.get(t, 5)):
         rows = []
         for sku in sorted(groups[tier], key=lambda s: (float(data.ref_of(s) or 0), s)):
-            br = data.breaks.get(sku, {})
+            br = _dressed_breaks(data, sku, dressed) if dressed else data.breaks.get(sku, {})
             cells = []
             for q in cols:
                 if q in br:
@@ -271,7 +343,10 @@ def _grid_menu(m, data, site, warns):
                     cells.append(money(data.ref_of(sku), site["quote_text"]))
                 else:
                     cells.append("—")
-            rows.append({"label": data.size_of(sku) or data.name_of(sku) or sku, "cells": cells})
+            label = data.size_of(sku) or data.name_of(sku) or sku
+            for k, v in label_map.items():  # e.g. "Single-sided" -> "Single-sided · 1 sticker"
+                label = label.replace(k, v)
+            rows.append({"label": label, "cells": cells})
         # Hoist a qualifier shared by every row (e.g. "Violet glass; sticker
         # applied") out of the labels and into a one-line section note — long
         # repeated labels crowd out the price columns on phones.
@@ -372,6 +447,8 @@ def _devices_menu(m, data, site, warns):
             # directly above them
             if PRINT_TIERS & {data.tier_of(s) for s in wraps}:
                 sections.append(_tierdefs_section(m))
+            for fam in m.get("post_families", []):  # e.g. box stickers
+                sections.append(_family_section(fam, data, site))
             sections.append({
                 "kind": "grid", "header": m.get("wrap_label", "RATE / WRAP"), "compact": True,
                 "rate_label": None, "media": None, "finishes": None,

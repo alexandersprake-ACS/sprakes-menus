@@ -39,9 +39,11 @@ def main():
 
     # 1. MIRON-STD-SAT-250 @100 = $4.84
     price = data.breaks.get("MIRON-STD-SAT-250", {}).get(100)
-    check("1 MIRON-STD-SAT-250 @100 = $4.84",
-          model.money(price) == "$4.84" and "$4.84" in html("miron-jars"),
-          f"model={model.money(price)}")
+    dressed250 = model.money(round(price + data.breaks["CAP-MIRON-STD"][100]
+                                   + data.breaks["CAPW-MIRON-STD"][100] + 1e-9, 2))
+    check("1 MIRON-STD-SAT-250 @100 = $4.84 (base; page shows dressed)",
+          model.money(price) == "$4.84" and dressed250 in html("miron-jars"),
+          f"model={model.money(price)} dressed={dressed250}")
 
     # 2. MYLS2B-STD-D-1LB @5000=$10.30 & @10000=$9.79 ascending
     b = data.breaks.get("MYLS2B-STD-D-1LB", {})
@@ -141,6 +143,50 @@ def main():
            and changes[0][2] == "@100" and "miron" in changes[0][0].lower())
     check("8 DIFF isolates one changed price", ok8, str(changes))
 
+    # 12. Fully-dressed pricing (Owner's Component Architecture, Oct 12):
+    # headline price = bundle + cap components at the SAME break. One ordered
+    # pin (CG 2oz STD @1,000 = 0.98+0.31+0.31 = $1.60) plus a per-family
+    # data-identity probe.
+    std_tbl = next(t for t in mm["chubby-jars"]["sections"]
+                   if t["kind"] == "grid" and t.get("header") == "STANDARD")
+    cols12 = [c["qty"] for c in std_tbl["columns"]]
+    cg_cells = {r["label"]: r["cells"] for r in std_tbl["rows"]}["2oz — Jar + label"]
+    pin_ok = cg_cells[cols12.index(1000)] == "$1.60"
+
+    def dressed_present(slug, sku, comps, q=1000):
+        want = model.money(round(data.breaks[sku][q]
+                                 + sum(data.breaks[c][q] for c in comps) + 1e-9, 2))
+        return want in html(slug)
+    fam_ok = all([
+        dressed_present("glass-jars", "GLSJAR-STD-CLR-2OZ", ["CAP-GLSJAR-STD", "CAPW-GLSJAR-STD"]),
+        dressed_present("concentrate-jars", "CONJAR-STD-5ML", ["CAP-CONJAR-STD", "CAPW-CONJAR-STD"]),
+        dressed_present("preroll-tubes", "TUBE-STD-99-POP", ["CAP-TUBE-STD"]),
+        dressed_present("miron-jars", "MIRON-STD-SAT-250", ["CAP-MIRON-STD", "CAPW-MIRON-STD"]),
+    ])
+    check("12 fully-dressed pricing (CG $1.60 pin + per-family identity)",
+          pin_ok and fam_ok, f"pin={pin_ok} cg={cg_cells} fam={fam_ok}")
+
+    # 13. Application wording (verbatim Owner ruling) on every applied page,
+    # old -$0.10 framing gone everywhere, miron trio live, box stickers on o2.
+    APPW = "APPLICATION — $0.35 PER STICKER APPLIED. APPLY YOUR OWN? NO FEE."
+    menus_cfg = json.load(open(os.path.join(ROOT, "config", "menus.json"), encoding="utf-8"))["menus"]
+    applied = ["glass-jars", "concentrate-jars", "chubby-jars", "miron-jars",
+               "mylar-bags", "preroll-tubes", "o2-devices"]
+    word_ok = all(APPW in html(sl) for sl in applied)
+    # probe the old PHRASE, not the bare amount — $0.10 is now a legitimate
+    # sticker price (STKR-STD-1X1 @1,000 after the Oct 6 reprice)
+    old_gone = all("W/O APPLICATION" not in html(mc["slug"])
+                   and "$0.10 / STICKER" not in html(mc["slug"]) for mc in menus_cfg)
+    hmn = html("miron-jars")
+    trio_m = (all(f"— {w}" in hmn for w in ("Jar alone", "Jar + label", "Label only"))
+              and -1 < hmn.find("WHAT THE TIERS MEAN") < hmn.find(">STANDARD<")
+              < hmn.find(">PREMIUM<") < hmn.find(">CONNOISSEUR<"))
+    singles_m = "SINGLES FROM $" in hmn and "EACH" in hmn
+    box_ok = "BOX STICKERS" in html("o2-devices")
+    check("13 app wording verbatim + old framing gone + miron trio + box stickers",
+          word_ok and old_gone and trio_m and singles_m and box_ok,
+          f"word={word_ok} old_gone={old_gone} trio={trio_m} singles={singles_m} box={box_ok}")
+
     # 9. every page + PDF carries the build date
     import datetime
     date = datetime.date.today().strftime("%B %-d, %Y")
@@ -193,7 +239,7 @@ def main():
                 for t in ("STD", "PRM", "CNSR"))
     std500 = [data.breaks["CHUBJAR-STD-2OZBLK"].get(q) for q in (500, 1000, 5000, 10000)]
     eq_vals_ok = std500 == [1.18, 0.98, 0.88, 0.82]
-    leak = [mc["slug"] for mc in menus_cfg if mc["slug"] != "chubby-jars"
+    leak = [mc["slug"] for mc in menus_cfg if mc["slug"] not in ("chubby-jars", "miron-jars")
             and ("— Jar alone" in html(mc["slug"]) or "— Label only" in html(mc["slug"]))]
     check("11 chubby consolidated three-way (defs/order/trio/dash/collapse/legend/equalized/contained)",
           order_ok and trio_ok and dash_ok and collapse_ok and repeat_ok
