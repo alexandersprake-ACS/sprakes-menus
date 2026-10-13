@@ -101,6 +101,8 @@
       "finishes": "NONE",
       "cap_prefix": "CAP-MIRON-",
       "cap_label": "RATE / JAR CAP STICKER",
+      "exclude_prefixes": ["MIRON-LBL-"],
+      "_exclude_note": "Temporary until the component restructure pass (Owner-signed Oct 12, 2026): label-only Miron SKUs would render as bare rows reading like cheaper jar bundles — same failure the CHUBJAR-LBL leak had on Oct 1. The Miron three-way work order un-hides them properly.",
       "tab_label": "MIRON"
     },
     {
