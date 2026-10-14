@@ -136,7 +136,7 @@ RENDERERS = {"grid": _grid, "schedule": _schedule, "flavors": _flavors, "kv": _k
              "infusion": _infusion, "tierdefs": _tierdefs}
 
 
-BANNER_SIZES = "(min-width:900px) 760px, 100vw"
+BANNER_SIZES = "100vw"  # full-bleed hero band
 
 
 def _banner(model):
@@ -246,9 +246,17 @@ def render_hub(models, site, build_date, rel_assets="assets"):
         '<nav class="tabbar"><div class="tabs" role="tablist" aria-label="Menus">',
     ]
     for m in models:
+        # image-led tile: the menu's banner as the card background (640w is
+        # plenty at tile size); pages without a banner fall back to plain
+        bg = ""
+        if m.get("banner"):
+            b = m["banner"]
+            bg = (f' style="background-image:url(\'{rel_assets}/banners/'
+                  f'{b["slug"]}-{b["widths"][0]}.webp\')"')
         parts.append(
             f'<button class="tab" role="tab" data-slug="{m["slug"]}" '
-            f'aria-selected="false" aria-controls="panel-{m["slug"]}">{e(m["tab_label"])}</button>'
+            f'aria-selected="false" aria-controls="panel-{m["slug"]}"{bg}>'
+            f'<span class="tl">{e(m["tab_label"])}</span></button>'
         )
     parts.append("</div></nav>")
     for m in models:

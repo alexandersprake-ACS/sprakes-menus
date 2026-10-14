@@ -18,7 +18,8 @@ html,body{margin:0;padding:0}
    proportionally instead of leaving a phone-width column adrift. */
 @media (min-width:900px){ html{ font-size:20px; } .wrap{ max-width:38rem; } }
 @media (min-width:1500px){ html{ font-size:23px; } }
-body{ font-family:'Poppins',sans-serif; color:var(--ink); background:var(--bg);
+body{ overflow-x:hidden; /* full-bleed hero uses 100vw, which includes the scrollbar */
+  font-family:'Poppins',sans-serif; color:var(--ink); background:var(--bg);
   -webkit-font-smoothing:antialiased; }
 .bgfix{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:-1;
   -webkit-print-color-adjust:exact; print-color-adjust:exact; }
@@ -27,15 +28,21 @@ body{ font-family:'Poppins',sans-serif; color:var(--ink); background:var(--bg);
 
 h1.title{ font-weight:700; letter-spacing:.14em; line-height:1.08; margin:.2rem 0 .5rem;
   font-size:2.15rem; }
-/* page-header banner: studio still-life with the title overlaid; a soft
-   scrim keeps the title legible on every banner's lighting */
-.banner{ position:relative; margin:0 0 .7rem; border-radius:14px; overflow:hidden; }
-.banner img{ display:block; width:100%; height:auto; }
+/* page-header hero banner: full-bleed studio still-life. The photography
+   reads at full strength — the scrim is confined to the left text zone
+   (banners keep their subject right-of-center with negative space left). */
+.banner{ position:relative; width:100vw; margin:-2.2rem 0 1.1rem calc(50% - 50vw);
+  height:clamp(160px, 24vw, 300px); overflow:hidden; }
+.panel .banner{ margin-top:0; }
+.banner img{ display:block; width:100%; height:100%;
+  object-fit:cover; object-position:70% 52%; }
 .banner::after{ content:""; position:absolute; inset:0;
-  background:linear-gradient(rgba(14,8,34,.52), rgba(14,8,34,.10) 60%); }
-.banner h1.title{ position:absolute; left:.8rem; right:.8rem; top:50%;
-  transform:translateY(-50%); margin:0; z-index:1;
-  text-shadow:0 2px 16px rgba(0,0,0,.6), 0 0 2px rgba(0,0,0,.5); }
+  background:linear-gradient(90deg, rgba(14,8,34,.72) 0%, rgba(14,8,34,.34) 36%,
+    rgba(14,8,34,0) 62%); }
+.banner h1.title{ position:absolute; z-index:1; left:clamp(1rem, 6vw, 4rem);
+  top:50%; transform:translateY(-50%); margin:0; text-align:left; max-width:62%;
+  font-size:clamp(1.7rem, 3.4vw, 2.7rem);
+  text-shadow:0 2px 18px rgba(0,0,0,.65), 0 0 3px rgba(0,0,0,.5); }
 .subtitle{ font-weight:300; letter-spacing:.14em; font-size:.72rem; color:var(--muted);
   margin:.1rem 0; text-transform:uppercase; }
 .stars{ margin:.7rem 0 1.1rem; line-height:0; }
@@ -140,12 +147,23 @@ table.kv .ksub{ font-size:.62rem; font-weight:300; color:var(--faint);
    and keeps left-aligned horizontal scrolling when it doesn't (phones). */
 .tabs{ display:flex; gap:.4rem; padding:.6rem .8rem; width:max-content; max-width:100%;
   margin:0 auto; }
-.tab{ flex:0 0 auto; font-family:inherit; font-size:.62rem; font-weight:600;
-  letter-spacing:.09em; text-transform:uppercase; color:var(--muted); cursor:pointer;
-  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.25);
-  border-radius:999px; padding:.45rem .85rem; white-space:nowrap; }
-.tab[aria-selected="true"]{ color:var(--ink); background:rgba(143,111,216,.35);
-  border-color:var(--star); }
+/* image-led category tiles: each tab shows its banner as the card
+   background with the name overlaid (fixed tile size — no CLS) */
+.tab{ flex:0 0 auto; position:relative; overflow:hidden; font-family:inherit;
+  font-size:.62rem; font-weight:600; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--ink); cursor:pointer; width:8.6rem; height:3.4rem;
+  background-color:rgba(255,255,255,.06); background-size:cover;
+  background-position:70% 50%; border:1px solid rgba(255,255,255,.25);
+  border-radius:12px; padding:0; white-space:normal; }
+.tab::after{ content:""; position:absolute; inset:0;
+  background:rgba(10,6,28,.42); transition:background .2s ease; }
+.tab:hover::after{ background:rgba(10,6,28,.22); }
+.tab .tl{ position:relative; z-index:1; display:flex; align-items:center;
+  justify-content:center; height:100%; padding:0 .5rem; text-align:center;
+  line-height:1.25; text-shadow:0 1px 8px rgba(0,0,0,.75), 0 0 2px rgba(0,0,0,.6); }
+.tab[aria-selected="true"]{ border-color:var(--star);
+  box-shadow:0 0 0 1.5px var(--star); }
+.tab[aria-selected="true"]::after{ background:rgba(10,6,28,.14); }
 .panel[hidden]{ display:none; }
 .panellinks{ font-size:.6rem; font-weight:600; letter-spacing:.12em; margin-bottom:.9rem; }
 .panellinks a{ color:#b9a4ee; text-decoration:none; }

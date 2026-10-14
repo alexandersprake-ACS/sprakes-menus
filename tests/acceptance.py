@@ -211,7 +211,15 @@ def main():
     n_hub = len(_re.findall(r'<div class="banner"', hub))
     if n_hub != len(models):
         bad14.append(f"hub has {n_hub} banners, want {len(models)}")
-    check("14 header banners on all pages + hub (dims, variants shipped)",
+    # hero treatment (Oct 14 follow-up): full-bleed cover band, scrim confined
+    # to the text zone, image-led hub tiles
+    css = open(os.path.join(ROOT, "assets", "css", "menu.css")).read()
+    if "object-fit:cover" not in css or "linear-gradient(90deg" not in css:
+        bad14.append("hero cover/left-scrim CSS missing")
+    n_tiles = len(_re.findall(r'<button class="tab" [^>]*background-image:url', hub))
+    if n_tiles != len(models):
+        bad14.append(f"hub has {n_tiles} image tiles, want {len(models)}")
+    check("14 hero banners on all pages + image-led hub tiles (dims, variants shipped)",
           not bad14, "; ".join(bad14[:6]))
 
     # 9. every page + PDF carries the build date
