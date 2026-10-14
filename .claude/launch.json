@@ -3,9 +3,9 @@
   "configurations": [
     {
       "name": "menus",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["/Users/acs/Desktop/Menu Build/scripts/serve.py", "8123"],
-      "port": 8123
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-lc", "cd '/Users/acs/Desktop/Menu Build/site' && exec python3 -m http.server 8732"],
+      "port": 8732
     }
   ]
 }

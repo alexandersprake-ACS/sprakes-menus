@@ -27,6 +27,15 @@ body{ font-family:'Poppins',sans-serif; color:var(--ink); background:var(--bg);
 
 h1.title{ font-weight:700; letter-spacing:.14em; line-height:1.08; margin:.2rem 0 .5rem;
   font-size:2.15rem; }
+/* page-header banner: studio still-life with the title overlaid; a soft
+   scrim keeps the title legible on every banner's lighting */
+.banner{ position:relative; margin:0 0 .7rem; border-radius:14px; overflow:hidden; }
+.banner img{ display:block; width:100%; height:auto; }
+.banner::after{ content:""; position:absolute; inset:0;
+  background:linear-gradient(rgba(14,8,34,.52), rgba(14,8,34,.10) 60%); }
+.banner h1.title{ position:absolute; left:.8rem; right:.8rem; top:50%;
+  transform:translateY(-50%); margin:0; z-index:1;
+  text-shadow:0 2px 16px rgba(0,0,0,.6), 0 0 2px rgba(0,0,0,.5); }
 .subtitle{ font-weight:300; letter-spacing:.14em; font-size:.72rem; color:var(--muted);
   margin:.1rem 0; text-transform:uppercase; }
 .stars{ margin:.7rem 0 1.1rem; line-height:0; }

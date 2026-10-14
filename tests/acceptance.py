@@ -187,6 +187,33 @@ def main():
           word_ok and old_gone and trio_m and singles_m and box_ok,
           f"word={word_ok} old_gone={old_gone} trio={trio_m} singles={singles_m} box={box_ok}")
 
+    # 14. page-header banners (Oct 13 order): every menu page carries its slug's
+    # banner band with explicit intrinsic dimensions (no CLS), the referenced
+    # variants exist on disk, and the hub embeds all of them
+    import re as _re
+    ban = json.load(open(os.path.join(ROOT, "assets", "banners", "manifest.json")))
+    bad14 = []
+    for m in models:
+        slug = m["slug"]
+        if slug not in ban:
+            bad14.append(f"{slug}: no banner in manifest"); continue
+        h = html(slug)
+        if f'<div class="banner"' not in h or f'assets/banners/{slug}-' not in h:
+            bad14.append(f"{slug}: band missing")
+        if f'width="{ban[slug]["w"]}" height="{ban[slug]["h"]}"' not in h:
+            bad14.append(f"{slug}: intrinsic dims missing")
+        for w in ban[slug]["widths"]:
+            for ext in ("avif", "webp"):
+                p = os.path.join(SITE, "assets", "banners", f"{slug}-{w}.{ext}")
+                if not os.path.exists(p):
+                    bad14.append(f"{slug}-{w}.{ext} not shipped")
+    hub = html("index")
+    n_hub = len(_re.findall(r'<div class="banner"', hub))
+    if n_hub != len(models):
+        bad14.append(f"hub has {n_hub} banners, want {len(models)}")
+    check("14 header banners on all pages + hub (dims, variants shipped)",
+          not bad14, "; ".join(bad14[:6]))
+
     # 9. every page + PDF carries the build date
     import datetime
     date = datetime.date.today().strftime("%B %-d, %Y")

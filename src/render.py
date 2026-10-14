@@ -136,10 +136,33 @@ RENDERERS = {"grid": _grid, "schedule": _schedule, "flavors": _flavors, "kv": _k
              "infusion": _infusion, "tierdefs": _tierdefs}
 
 
+BANNER_SIZES = "(min-width:900px) 760px, 100vw"
+
+
+def _banner(model):
+    """Header band: responsive studio banner with the page title overlaid.
+    Explicit width/height (intrinsic) so the band reserves space — no CLS."""
+    b = model["banner"]
+    av = ", ".join(f'assets/banners/{b["slug"]}-{w}.avif {w}w' for w in b["widths"])
+    wp = ", ".join(f'assets/banners/{b["slug"]}-{w}.webp {w}w' for w in b["widths"])
+    fallback = b["widths"][min(1, len(b["widths"]) - 1)]
+    return (
+        '<div class="banner"><picture>'
+        f'<source type="image/avif" srcset="{av}" sizes="{BANNER_SIZES}">'
+        f'<source type="image/webp" srcset="{wp}" sizes="{BANNER_SIZES}">'
+        f'<img src="assets/banners/{b["slug"]}-{fallback}.webp" '
+        f'width="{b["w"]}" height="{b["h"]}" alt="" decoding="async"></picture>'
+        f'<h1 class="title">{_title_html(model["title"])}</h1></div>'
+    )
+
+
 def render_menu_body(model, site, build_date):
     """The menu's inner content (title -> price date), shared by the standalone
     page and the index hub panels."""
-    parts = [f'<h1 class="title">{_title_html(model["title"])}</h1>']
+    if model.get("banner"):
+        parts = [_banner(model)]
+    else:
+        parts = [f'<h1 class="title">{_title_html(model["title"])}</h1>']
     for line in model.get("subtitle", []):
         parts.append(f'<div class="subtitle">{e(line)}</div>')
     parts.append(_stars())
