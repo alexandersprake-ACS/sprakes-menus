@@ -246,7 +246,21 @@ def main():
         h = html(slug)
         if len(_re.findall(r'<div class="media">', h)) != 3:
             bad15.append(f"{slug}: expected 3 tier media lines")
-    check("15 per-tier media/finishes distinct; no FINISHES:NONE on Premium/Connoisseur",
+    # page-level sweep (Oct 15 follow-up): on ANY page selling tiered products,
+    # the legacy media string must not appear anywhere, and FINISHES : NONE may
+    # only ever occur inside the STANDARD tier's own subtitle. Untiered pages
+    # (direct-to-bag) keep their line — FINISHES : NONE is true there.
+    tiered_slugs = {m["slug"] for m in models
+                    if any("tierdefs" == s["kind"] for s in m["sections"])}
+    for slug in sorted(tiered_slugs):
+        h = html(slug)
+        if "MATTE / GLOSS / PAPER (3MM VINYL)" in h:
+            bad15.append(f"{slug}: legacy media string present")
+        body = _re.sub(r'<div class="media">MEDIA : REGULAR WHITE VINYL.*?</div>',
+                       "", h)  # the one legitimate Standard-subtitle occurrence
+        if "FINISHES : NONE" in strip_tags(body):
+            bad15.append(f"{slug}: FINISHES : NONE outside the Standard subtitle")
+    check("15 per-tier media/finishes distinct; no legacy/NONE leaks on tiered pages",
           not bad15, "; ".join(bad15[:6]))
 
     # 9. every page + PDF carries the build date
