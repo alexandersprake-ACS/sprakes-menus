@@ -1,22 +1,49 @@
 {
-  "_comment": "Standing footer/disclaimer text. The cash/Zelle line carries over VERBATIM (spec 5.8 — discount framing, allowed). The terpene liability disclaimer is the SANITIZED replacement (spec 5.9): it names NO third parties. R may edit.",
-  "footer_discount": "3% discount on cash or Zelle payments.",
-  "terpene_disclaimer": {
-    "heading": "*MAY NOT PASS LABORATORY TESTING",
-    "body": "There may be others that may have faint traces of residual solvents. They should work with flower but it is recommended that a small amount is tested first before infusing large quantities to be 100% sure. Sprake's cannot be liable should any test fail."
-  },
-  "infusion_notes": {
-    "own_terpenes": "Using your own terpenes? Service price only.",
-    "flavor_note": ["CHOOSE YOUR STRENGTH:", "Light, Medium, or Heavy — same price at any strength."]
-  },
-  "print_tiers": {
-    "_comment": "Owner ruling Sep 30, 2026 — the three definitions are VERBATIM (incl. 'colour'); do not rephrase. Rendered once on every menu whose products carry Standard/Premium/Connoisseur tiers (auto-detected in src/model.py). The lead line is adaptable per menu via print_tiers_lead in menus.json.",
-    "heading": "WHAT THE TIERS MEAN",
-    "lead": "All tiers use the same container — the tier is the label:",
-    "tiers": [
-      ["Standard", "regular white vinyl, colour print, no finish layers."],
-      ["Premium", "regular white vinyl, colour print, single spot-UV layer (gloss or matte) plus white-ink layer."],
-      ["Connoisseur", "specialty vinyl (flaked / frosted / rainbow holographic), colour print, white layer, raised spot-UV (gloss or matte)."]
-    ]
+ "_comment": "Standing footer/disclaimer text. The cash/Zelle line carries over VERBATIM (spec 5.8 — discount framing, allowed). The terpene liability disclaimer is the SANITIZED replacement (spec 5.9): it names NO third parties. R may edit.",
+ "footer_discount": "3% discount on cash or Zelle payments.",
+ "terpene_disclaimer": {
+  "heading": "*MAY NOT PASS LABORATORY TESTING",
+  "body": "There may be others that may have faint traces of residual solvents. They should work with flower but it is recommended that a small amount is tested first before infusing large quantities to be 100% sure. Sprake's cannot be liable should any test fail."
+ },
+ "infusion_notes": {
+  "own_terpenes": "Using your own terpenes? Service price only.",
+  "flavor_note": [
+   "CHOOSE YOUR STRENGTH:",
+   "Light, Medium, or Heavy — same price at any strength."
+  ]
+ },
+ "print_tiers": {
+  "_comment": "Owner ruling Sep 30, 2026 — the three definitions are VERBATIM (incl. 'colour'); do not rephrase. Rendered once on every menu whose products carry Standard/Premium/Connoisseur tiers (auto-detected in src/model.py). The lead line is adaptable per menu via print_tiers_lead in menus.json.",
+  "heading": "WHAT THE TIERS MEAN",
+  "lead": "All tiers use the same container — the tier is the label:",
+  "tiers": [
+   [
+    "Standard",
+    "regular white vinyl, colour print, no finish layers."
+   ],
+   [
+    "Premium",
+    "regular white vinyl, colour print, single spot-UV layer (gloss or matte) plus white-ink layer."
+   ],
+   [
+    "Connoisseur",
+    "specialty vinyl (flaked / frosted / rainbow holographic), colour print, white layer, raised spot-UV (gloss or matte)."
+   ]
+  ],
+  "_section_specs_comment": "Per-tier MEDIA/FINISHES subtitle under each tier section heading (Oct 15 order: the old per-menu static line said 'FINISHES : NONE' on all three tiers). These are STRUCTURED RESTATEMENTS of the verbatim tier definitions above - if the Owner ever amends the definitions, amend these in the same commit. No two tiers may read the same.",
+  "section_specs": {
+   "Standard": {
+    "media": "REGULAR WHITE VINYL, COLOUR PRINT",
+    "finishes": "NONE"
+   },
+   "Premium": {
+    "media": "REGULAR WHITE VINYL, COLOUR PRINT",
+    "finishes": "SINGLE SPOT-UV (GLOSS OR MATTE) + WHITE-INK LAYER"
+   },
+   "Connoisseur": {
+    "media": "SPECIALTY VINYL (FLAKED / FROSTED / RAINBOW HOLOGRAPHIC), COLOUR PRINT",
+    "finishes": "WHITE LAYER + RAISED SPOT-UV (GLOSS OR MATTE)"
+   }
   }
+ }
 }

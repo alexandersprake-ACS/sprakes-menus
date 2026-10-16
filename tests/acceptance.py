@@ -222,6 +222,33 @@ def main():
     check("14 hero banners on all pages + image-led hub tiles (dims, variants shipped)",
           not bad14, "; ".join(bad14[:6]))
 
+    # 15. per-tier MEDIA/FINISHES subtitles (Oct 15 order): wherever tier sections
+    # carry a media line, the three tiers must read differently, and
+    # "FINISHES : NONE" may never appear under Premium or Connoisseur
+    bad15 = []
+    pair_re = _re.compile(
+        r'<span class="sechead">([^<]+)</span></div>(?:(?!<section).)*?<div class="media">(.*?)</div>',
+        _re.S)
+    strip_tags = lambda s: _re.sub(r"<[^>]+>", "", s)
+    for m in models:
+        pairs = [(h, strip_tags(x)) for h, x in pair_re.findall(html(m["slug"]))]
+        tiered = [(h, x) for h, x in pairs
+                  if any(t in h for t in ("STANDARD", "PREMIUM", "CONNOISSEUR"))]
+        if not tiered:
+            continue
+        if len({x for _, x in tiered}) != len(tiered):
+            bad15.append(f"{m['slug']}: tier media lines not distinct")
+        for h, x in tiered:
+            if ("PREMIUM" in h or "CONNOISSEUR" in h) and "FINISHES : NONE" in x:
+                bad15.append(f"{m['slug']}: FINISHES : NONE under {h}")
+    # the fix must actually be present: the 5 known pages carry 3 distinct lines
+    for slug in ("glass-jars", "concentrate-jars", "stickers", "mylar-bags", "preroll-tubes"):
+        h = html(slug)
+        if len(_re.findall(r'<div class="media">', h)) != 3:
+            bad15.append(f"{slug}: expected 3 tier media lines")
+    check("15 per-tier media/finishes distinct; no FINISHES:NONE on Premium/Connoisseur",
+          not bad15, "; ".join(bad15[:6]))
+
     # 9. every page + PDF carries the build date
     import datetime
     date = datetime.date.today().strftime("%B %-d, %Y")

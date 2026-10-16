@@ -358,11 +358,16 @@ def _grid_menu(m, data, site, warns):
                 r["label"] = s[0]
         label = m.get("section_prefix", "")
         header = (label + " — " if label else "") + (tier if tier and tier != "N/A" else "PRICING")
+        # per-tier MEDIA/FINISHES from the shared tier canon (config/disclaimers.json
+        # print_tiers.section_specs); untiered pages keep their own menu-level line
+        spec = _load_json("disclaimers.json")["print_tiers"]["section_specs"].get(tier)
+        media = spec["media"] if spec else m.get("media")
+        finishes = spec["finishes"] if spec else m.get("finishes")
         sections.append({
             "kind": "grid", "header": header.strip(" —").upper(),
             "variant_note": variant_note,
             "rate_label": m.get("rate_label", "RATE / STICKER"),
-            "media": m.get("media"), "finishes": m.get("finishes"),
+            "media": media, "finishes": finishes,
             "columns": [{"qty": q, "label": _qty_label(q), "popular": q == popular} for q in cols],
             "rows": rows,
         })
