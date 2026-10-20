@@ -263,6 +263,31 @@ def main():
     check("15 per-tier media/finishes distinct; no legacy/NONE leaks on tiered pages",
           not bad15, "; ".join(bad15[:6]))
 
+    # 16. guard-first (Oct 20): STKR-CUSTOM-* (one-per-tier forms items, no
+    # breaks) must never load or render. Probe strings come from the cached
+    # records themselves, so a base-side rename can't silently defeat the check.
+    bad16 = []
+    if "STKR-CUSTOM-" not in site.get("global_exclude_prefixes", []):
+        bad16.append("guard prefix missing from site.json")
+    if any(s.startswith("STKR-CUSTOM-") for s in data.products):
+        bad16.append("STKR-CUSTOM loaded into model data")
+    snap = json.load(open(os.path.join(ROOT, "build-cache", "price-snapshot.json")))
+    if any(s.startswith("STKR-CUSTOM-") for s in snap):
+        bad16.append("STKR-CUSTOM in price snapshot")
+    probes = {"STKR-CUSTOM-"}
+    for r in airtable.load_cache()["products"]:
+        if (r["f"].get(airtable.F["sku"]) or "").startswith("STKR-CUSTOM-"):
+            for k in ("size", "name"):
+                if r["f"].get(airtable.F[k]):
+                    probes.add(r["f"][airtable.F[k]])
+    for m in models:
+        h = html(m["slug"]); t = pdf_text(m["slug"])
+        for p in probes:
+            if p in h or p in t:
+                bad16.append(f"{m['slug']}: renders {p!r}")
+    check("16 guard: STKR-CUSTOM-* never loads, renders, or enters the snapshot",
+          not bad16, "; ".join(bad16[:6]))
+
     # 9. every page + PDF carries the build date
     import datetime
     date = datetime.date.today().strftime("%B %-d, %Y")

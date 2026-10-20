@@ -64,12 +64,15 @@ def money_flat(v, quote_text="Quote"):
 class Data:
     """Indexed view over the cached tables."""
 
-    def __init__(self, cache):
+    def __init__(self, cache, exclude=()):
         F = airtable.F
+        # exclude: site-wide guard prefixes (site.json global_exclude_prefixes) —
+        # matching SKUs never reach any family, page, PDF, or the price snapshot
+        exclude = tuple(exclude)
         self.products = {}  # sku -> fields dict
         for r in cache["products"]:
             sku = r["f"].get(F["sku"])
-            if sku:
+            if sku and not sku.startswith(exclude):
                 self.products[sku] = r["f"]
         # breaks: sku -> {qty(int): price}
         self.breaks = {}
@@ -78,6 +81,8 @@ class Data:
             if " @" not in label:
                 continue
             sku, q = label.rsplit(" @", 1)
+            if exclude and sku.startswith(exclude):
+                continue
             try:
                 qty = int(float(q))
             except ValueError:
@@ -602,7 +607,7 @@ BUILDERS = {
 
 
 def build_models(cache, site):
-    data = Data(cache)
+    data = Data(cache, site.get("global_exclude_prefixes", []))
     menus_cfg = _load_json("menus.json")["menus"]
     warns = []
     models = []
