@@ -13,6 +13,9 @@
     "Terp Science",
     "Terpene Store",
     "Gas Station",
+    "StickerApp",
+    "StickerPlug",
+    "SlapHub",
     "$0.00"
   ],
   "_global_exclude_comment": "GUARD-FIRST (Oct 20): SKUs starting with these prefixes are dropped at load and never render on any page/PDF or enter the snapshot. STKR-CUSTOM-STD/-PRM/-CNSR are the new one-per-tier sticker items (size on the order line, no price breaks) - forms-side only; the stickers menu is priced from the forms quote endpoint instead. Check 16 pins this.",

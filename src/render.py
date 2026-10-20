@@ -178,7 +178,8 @@ def render_menu_body(model, site, build_date):
         parts.append(f'<div class="disclaimer"><div class="dh">{e(d["heading"])}</div>'
                      f'<div class="dp">{e(d["body"])}</div></div>')
     parts.append(f'<div class="foot">{e(site["footer_discount"])}</div>')
-    parts.append(f'<div class="pricedate">Prices current as of {e(build_date)}.</div>')
+    note = f' <span class="pricenote">· {e(model["price_note"])}</span>' if model.get("price_note") else ""
+    parts.append(f'<div class="pricedate">Prices current as of {e(build_date)}.{note}</div>')
     return "".join(parts)
 
 

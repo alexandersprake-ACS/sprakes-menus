@@ -288,6 +288,75 @@ def main():
     check("16 guard: STKR-CUSTOM-* never loads, renders, or enters the snapshot",
           not bad16, "; ".join(bad16[:6]))
 
+    # 17. sticker formula chart (Oct 20): endpoint-priced, same page as before
+    from src import sticker_quote
+    stm = next(mc for mc in menus_cfg if mc["slug"] == "stickers")
+    chart = stm["chart"]
+    quotes = sticker_quote.load(chart)
+    ver = quotes["version"]
+    hs, ps = html("stickers"), pdf_text("stickers")
+    bad17 = []
+    smodel = next(mm for mm in models if mm["slug"] == "stickers")
+    grids = [s for s in smodel["sections"] if s["kind"] == "grid"]
+    if [g["header"] for g in grids] != ["STANDARD", "PREMIUM", "CONNOISSEUR"]:
+        bad17.append("tier sections wrong")
+    for g in grids:
+        if [r["label"] for r in g["rows"]] != [sz["label"] for sz in chart["sizes"]]:
+            bad17.append(f"{g['header']}: preset sizes/labels changed")
+        if [c["qty"] for c in g["columns"]] != [100, 500, 1000, 5000, 10000]:
+            bad17.append(f"{g['header']}: columns changed")
+        if any(not _re.fullmatch(r"\$\d+\.\d\d", c) for r in g["rows"] for c in r["cells"]):
+            bad17.append(f"{g['header']}: non-price cell")
+    # grid version visible on page + PDF; any-size line present; no shop names
+    if f"Price grid {ver}" not in hs or f"Price grid {ver}" not in " ".join(ps.split()):
+        bad17.append("grid version not shown on page/PDF")
+    if chart["any_size_note"] not in hs:
+        bad17.append("any-size line missing")
+    for shop in ("StickerApp", "StickerPlug", "SlapHub"):
+        if shop not in site["forbidden_strings"]:
+            bad17.append(f"{shop} not on the forbidden list")
+    # independence: archive every STKR-{TIER}-{SIZE} item (and its breaks) from
+    # the cache - the stickers page must render the same chart regardless
+    arch = airtable.load_cache()
+    isstk = lambda s: (s or "").startswith("STKR-")
+    arch["products"] = [r for r in arch["products"] if not isstk(r["f"].get(airtable.F["sku"]))]
+    arch["price_breaks"] = [r for r in arch["price_breaks"]
+                            if not isstk((r["f"].get(airtable.F["break"]) or "").split(" @")[0])]
+    amodels, _, _ = model.build_models(arch, site)
+    if next(mm for mm in amodels if mm["slug"] == "stickers")["sections"] != smodel["sections"]:
+        bad17.append("stickers chart still depends on the 33 STKR size items")
+    # fail loud: a missing or non-numeric price must refuse to publish
+    for mutate in ("drop", "text"):
+        q2 = json.loads(json.dumps(quotes))
+        cards = q2["prices"]["Premium"][sticker_quote._key(chart["sizes"][2])]
+        if mutate == "drop":
+            cards.pop("1000")
+        else:
+            cards["1000"] = "0.36"
+        try:
+            sticker_quote.validate(chart, q2)
+            bad17.append(f"validate() accepted a {mutate} price")
+        except SystemExit:
+            pass
+    check("17 sticker chart: endpoint-priced, same layout, version shown, fail-loud, archive-proof",
+          not bad17, "; ".join(bad17[:6]))
+
+    # 17b. price pin: while the grid is the cutover version, every cell must
+    # equal the chart that was live before the switch (mismatch = wiring bug).
+    # A re-survey (new version) turns this into a [DATA] gap, never a freeze.
+    import html as _html
+    fx = json.load(open(os.path.join(ROOT, "tests", "fixtures", "stickers-live-2026-10-19.json")))
+    if ver == fx["grid_version"]:
+        mism = [f"{g['header']} {r['label']} {c['label']}: {v} != {fx['tiers'][g['header']][r['label']][c['label']]}"
+                for g in grids for r in g["rows"] for c, v in zip(g["columns"], r["cells"])
+                if fx["tiers"][g["header"]][_html.unescape(r["label"])][c["label"]] != v]
+        n = sum(len(r["cells"]) for g in grids for r in g["rows"])
+        check(f"17b sticker chart == live pre-cutover values ({n} cells, grid {ver})",
+              not mism and n == 165, "; ".join(mism[:6]))
+    else:
+        check(f"17b [DATA] sticker grid is {ver}, fixture pins {fx['grid_version']} - "
+              f"verify the new live chart, then refresh tests/fixtures", False)
+
     # 9. every page + PDF carries the build date
     import datetime
     date = datetime.date.today().strftime("%B %-d, %Y")

@@ -592,6 +592,42 @@ def _wrap(m, sections, site, disclaimer):
     }
 
 
+def _sticker_chart_menu(m, data, site, warns):
+    """Stickers (Oct 20 ruling): the same preset size chart customers always
+    saw, priced from the forms app's area-based quote endpoint instead of the
+    33 STKR-{TIER}-{SIZE} items — archiving those changes nothing here."""
+    from . import sticker_quote
+    chart = m["chart"]
+    quotes = sticker_quote.load(chart)
+    popular = site.get("popular_quantity")
+    cols = chart["qtys"]
+    specs = _load_json("disclaimers.json")["print_tiers"]["section_specs"]
+    sections = [_tierdefs_section(m)]
+    snap = {"STKR-GRID": {"ref": quotes["version"], "breaks": {}}}
+    for tier in sticker_quote.TIERS:
+        rows = []
+        for size in chart["sizes"]:
+            cards = quotes["prices"][tier][sticker_quote._key(size)]
+            rows.append({"label": size["label"],
+                         "cells": [money(cards[str(q)], site["quote_text"]) for q in cols]})
+            key = ("STKR-GRID-" + TIER_ABBR[tier] + "-"
+                   + f'{size["w"]}X{size["h"]}'.replace(".", ""))
+            snap[key] = {"ref": None, "breaks": {str(q): cards[str(q)] for q in cols}}
+        sections.append({
+            "kind": "grid", "header": tier.upper(),
+            "variant_note": chart.get("variant_note"),
+            "rate_label": m.get("rate_label", "RATE / STICKER"),
+            "media": specs[tier]["media"], "finishes": specs[tier]["finishes"],
+            "columns": [{"qty": q, "label": _qty_label(q), "popular": q == popular} for q in cols],
+            "rows": rows,
+        })
+    sections[-1]["after"] = [chart["any_size_note"]]
+    model = _wrap(m, sections, site, disclaimer=False)
+    model["price_note"] = f'Price grid {quotes["version"]}'
+    model["quote_snapshot"] = snap
+    return model
+
+
 def _qty_label(q):
     return "EACH" if q == 1 else f"{q:,}"
 
@@ -603,6 +639,7 @@ def _ml(q):
 BUILDERS = {
     "grid": _grid_menu, "devices": _devices_menu, "terpenes": _terpenes_menu,
     "infusion": _infusion_menu, "flat": _flat_menu,
+    "sticker_chart": _sticker_chart_menu,
 }
 
 

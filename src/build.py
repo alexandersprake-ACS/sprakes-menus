@@ -15,7 +15,7 @@ import os
 import shutil
 import sys
 
-from . import airtable, model, pdf, render
+from . import airtable, model, pdf, render, sticker_quote
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SITE = os.path.join(ROOT, "site")
@@ -91,9 +91,10 @@ def forbidden_scan(site):
     for fn in os.listdir(SITE):
         if not fn.endswith(".html"):
             continue
-        text = open(os.path.join(SITE, fn), encoding="utf-8").read()
+        # case-insensitive: menu copy is often rendered in caps (SLAPHUB == SlapHub)
+        text = open(os.path.join(SITE, fn), encoding="utf-8").read().lower()
         for b in bad:
-            if b in text:
+            if b.lower() in text:
                 hits.append((fn, b))
     return hits
 
@@ -108,6 +109,8 @@ def copy_assets():
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--fetch", action="store_true", help="fetch Airtable via AIRTABLE_TOKEN first")
+    ap.add_argument("--fetch-quotes", action="store_true",
+                    help="fetch sticker chart prices from the forms quote endpoint (implied by --fetch)")
     ap.add_argument("--no-pdf", action="store_true")
     ap.add_argument("--diff", action="store_true", help="print price changes vs last snapshot")
     ap.add_argument("--index", action="store_true", help="publish indexable (override noindex)")
@@ -126,6 +129,11 @@ def main(argv=None):
             raise SystemExit("FATAL: --fetch requires AIRTABLE_TOKEN in the environment.")
         print("Fetching Airtable ...")
         airtable.fetch_all(token)
+    if args.fetch or args.fetch_quotes:
+        for mc in json.load(open(os.path.join(CFG, "menus.json"), encoding="utf-8"))["menus"]:
+            if mc.get("chart"):
+                q = sticker_quote.fetch(mc["chart"])
+                print(f"  {mc['slug']}: price grid {q['version']}")
 
     cache = airtable.load_cache()
     models, warns, data = model.build_models(cache, site)
@@ -148,6 +156,8 @@ def main(argv=None):
 
     # DIFF against previous snapshot (before overwriting)
     new_snap = compute_snapshot(data)
+    for m in models:  # endpoint-priced charts (stickers) ride the same DIFF audit
+        new_snap.update(m.get("quote_snapshot") or {})
     if args.diff:
         old_snap = json.load(open(SNAP, encoding="utf-8")) if os.path.exists(SNAP) else {}
         changes = diff_snapshots(old_snap, new_snap)

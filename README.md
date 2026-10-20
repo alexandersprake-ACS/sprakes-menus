@@ -52,11 +52,28 @@ python -m src.build
 
 # Faster HTML-only (skip PDFs):
 python -m src.build --no-pdf
+
+# Refresh only the sticker chart prices (no Airtable token needed):
+python -m src.build --fetch-quotes
 ```
 
 The build **fails, does not publish**, if Airtable is unreachable, a family returns
 zero products, or a cached fetch is incomplete (a completeness guard catches
 dropped/paginated records — see `src/airtable.py`).
+
+**Sticker chart (Oct 20 ruling).** The stickers page is NOT priced from Airtable.
+Sticker pricing is area-based and lives in the forms app as a versioned grid; the
+build calls its public price-only endpoint (`POST /api/stickers/quote` on
+order.sprakes-usa.com, one call per size × tier, paced under its 30/min limit)
+for the preset sizes listed in `config/menus.json` → stickers → `chart` (display
+labels only — the grid is never copied here). `--fetch` implies `--fetch-quotes`.
+Unreachable endpoint, an error, a missing/non-numeric price, an oversize size, or
+mixed grid versions → **FATAL, nothing publishes** (`src/sticker_quote.py`). The
+grid version prints in the stickers footer ("Price grid 2026-10-19") and rides
+the DIFF audit as `STKR-GRID` (version) + `STKR-GRID-{TIER}-{SIZE}` (cells).
+The old 33 `STKR-{TIER}-{SIZE}` items no longer feed any page; archiving them
+only logs REMOVED lines in the DIFF. `STKR-CUSTOM-*` (one-per-tier forms items)
+are excluded site-wide by `global_exclude_prefixes` in `config/site.json`.
 
 ## Price-change audit (DIFF)
 
