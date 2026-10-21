@@ -179,7 +179,7 @@
    "category": "Mylar Bags (Direct Print)",
    "layout": "grid",
    "subtitle": [
-    "DIRECT TO BAG PRINT (IN-HOUSE)",
+    "DIRECT TO BAG PRINT",
     "SAME DAY / 24HR TURN AROUND ON MOST ORDERS"
    ],
    "includes": [
@@ -189,7 +189,7 @@
    "rate_label": "RATE / BAG",
    "media": "WHITE / BLACK MYLAR",
    "finishes": "NONE",
-   "section_prefix": "IN-HOUSE DIRECT TO BAG PRINT",
+   "section_prefix": "DIRECT TO BAG PRINT",
    "tab_label": "MYLAR · DTP"
   },
   {
@@ -299,7 +299,7 @@
       "label": "14.5x16.5 (1lb)"
      }
     ],
-    "any_size_note": "NEED A DIFFERENT SIZE? WE PRINT ANY SIZE — PRICED BY AREA."
+    "any_size_note": "NEED A DIFFERENT SIZE? WE PRINT ANY SIZE UP TO 240 SQ IN, PRICED BY AREA. LARGER SIZES QUOTED."
    },
    "print_tiers_lead": "Stickers are the label — the tier is the material and finish stack:",
    "tab_label": "STICKERS"
@@ -394,7 +394,8 @@
      "prefix": "BOXSTKR-",
      "header": "BOX STICKERS",
      "note": "CARTRIDGE · DISPLAY · MASTER — TOP / SIDE / WRAP BY SHAPE",
-     "rate_label": "RATE / STICKER"
+     "rate_label": "RATE / STICKER",
+     "label_shape": true
     }
    ]
   }

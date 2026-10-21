@@ -121,6 +121,25 @@ def forbidden_scan(site, terms, pdfs=True):
     return hits
 
 
+def copy_scan(site, pdfs=True):
+    """One-stop-shop guard: forbidden copy patterns in the rendered TEXT (markup
+    stripped, so class names and URLs can't trip it) of every page and PDF."""
+    import html as _h
+    import re as _re
+    pats = [p.lower() for p in site.get("copy_forbidden_patterns", [])]
+    texts = [(fn, _h.unescape(_re.sub(r"<[^>]+>", " ", open(os.path.join(SITE, fn), encoding="utf-8").read())))
+             for fn in sorted(os.listdir(SITE)) if fn.endswith(".html")]
+    if pdfs:
+        texts += list(_pdf_texts())
+    return [(fn, p) for fn, t in texts for p in pats if p in " ".join(t.split()).lower()]
+
+
+def pacific_today():
+    """The shop's calendar day (America/Los_Angeles), not the runner's UTC date."""
+    from zoneinfo import ZoneInfo
+    return datetime.datetime.now(ZoneInfo("America/Los_Angeles")).date()
+
+
 def _refuse_on_hits(hits, what):
     if hits:
         for fn, b in hits:
@@ -181,7 +200,7 @@ def main(argv=None):
     with open(os.path.join(ROOT, "assets", "css", "menu.css"), "rb") as fh:
         site["asset_v"] = hashlib.md5(fh.read()).hexdigest()[:8]
 
-    build_date = datetime.date.today().strftime("%B %-d, %Y")
+    build_date = pacific_today().strftime("%B %-d, %Y")
 
     # DIFF against previous snapshot (before overwriting)
     new_snap = compute_snapshot(data)
@@ -216,7 +235,7 @@ def main(argv=None):
         if base:
             robots += f"Sitemap: {base}/sitemap.xml\n"
             urls = [f"{base}/"] + [f"{base}/{m['slug']}.html" for m in models]
-            today = datetime.date.today().isoformat()
+            today = pacific_today().isoformat()
             with open(os.path.join(SITE, "sitemap.xml"), "w", encoding="utf-8") as fh:
                 fh.write('<?xml version="1.0" encoding="UTF-8"?>\n'
                          '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
@@ -235,6 +254,7 @@ def main(argv=None):
     # hard gate: forbidden strings + base supplier names (spec 5.1 / 8.7), HTML
     terms = forbidden_terms(site, data)
     _refuse_on_hits(forbidden_scan(site, terms, pdfs=False), "string")
+    _refuse_on_hits(copy_scan(site, pdfs=False), "copy pattern")
 
     # PDFs
     if not args.no_pdf:
@@ -246,6 +266,7 @@ def main(argv=None):
         print(f"  exported {len(models)} PDFs")
         # same gate over the PDF text, before anything can publish
         _refuse_on_hits([h for h in forbidden_scan(site, terms) if h[0].startswith("pdf/")], "string")
+        _refuse_on_hits([h for h in copy_scan(site) if h[0].startswith("pdf/")], "copy pattern")
 
     # persist snapshot for next DIFF
     with open(SNAP, "w", encoding="utf-8") as fh:

@@ -104,8 +104,9 @@ def main():
     # spot-check: an internal SKU flavor token that is NOT a marketing name must be absent
     internal_only = "GOLDENGRAMS"  # internal spelling; marketing uses different names
     check("6a TERP-CDT @5mL = $25.75", model.money(cdt) == "$25.75", f"model={model.money(cdt)}")
-    check("6b Terpenes flavors from marketing list only", internal_only not in ht.upper(),
-          "internal SKU token leaked" if internal_only in ht.upper() else "clean")
+    leak6b = internal_only in ht.upper() or "TERP-BOT-" in ht
+    check("6b no internal flavor SKU tokens on the terpenes page", not leak6b,
+          "internal SKU token leaked" if leak6b else "clean")
 
     # 6c. Marketing flavor list: confirmed counts (owner sign-offs 2026-07-17
     # and 2026-09-30: +77 reconciled base flavors; the five spec-5.3 pair-names
@@ -312,6 +313,8 @@ def main():
         bad17.append("grid version not shown on page/PDF")
     if chart["any_size_note"] not in hs:
         bad17.append("any-size line missing")
+    if "240 SQ IN" not in chart["any_size_note"] or "QUOTED" not in chart["any_size_note"]:
+        bad17.append("any-size line must state the 240 sq in limit and that larger sizes are quoted")
     for shop in ("StickerApp", "StickerPlug", "SlapHub"):
         if shop not in site["forbidden_strings"]:
             bad17.append(f"{shop} not on the forbidden list")
@@ -429,9 +432,99 @@ def main():
     check("19 supplier guard: base supplier names forbidden (brand allow-list), HTML + PDF",
           not bad19, "; ".join(bad19[:6]))
 
+    # 20. one-stop-shop copy guard (Oct 21): no in-house / external-production
+    # / sourcing language in rendered copy (HTML text + PDF text)
+    bad20 = [f"{fn}: {p!r}" for fn, p in build.copy_scan(site)]
+    if "IN-HOUSE" in html("direct-to-bag").upper():
+        bad20.append("direct-to-bag still says in-house")
+    tmp = os.path.join(SITE, "zz-check20.html")
+    open(tmp, "w").write("<p>Printed IN HOUSE by our team</p>")
+    try:
+        if not any(fn == "zz-check20.html" for fn, _ in build.copy_scan(site, pdfs=False)):
+            bad20.append("planted in-house phrase not caught")
+    finally:
+        os.remove(tmp)
+    check("20 one-stop-shop copy guard (HTML + PDF)", not bad20, "; ".join(bad20[:6]))
+
+    # 21. flavor UNION (Oct 21): every base TERP-BOT-* flavor is on both flavor
+    # menus exactly once (mapped to its marketing entry or appended verbatim)
+    # unless it is one of the five held pair-names, which are absent; curated
+    # groups unchanged. Planted rows prove a new kiosk flavor appears, an
+    # archived one doesn't, and a name colliding with a curated entry shows once.
+    bad21 = []
+    ucfg = json.load(open(os.path.join(ROOT, "config", "flavor-union.json"), encoding="utf-8"))
+    held = set(ucfg["held_names"])
+    curated = [(g["name"], g["flavors"]) for g in flavors_cfg["groups"]]
+
+    def _flav(ms, slug):
+        mm = next(x for x in ms if x["slug"] == slug)
+        return next(sec for sec in mm["sections"] if sec["kind"] == "flavors")
+    base_fl = sorted(s for s in data.products if s.startswith("TERP-BOT-"))
+    for slug in ("terpenes", "terpene-infusion"):
+        sec = _flav(models, slug)
+        names = [f for g in sec["groups"] for f in g["flavors"]]
+        if [(g["name"], g["flavors"]) for g in sec["groups"][:len(curated)]] != curated:
+            bad21.append(f"{slug}: curated groups changed")
+        dup = sorted({n for n in names if names.count(n) > 1})
+        if dup:
+            bad21.append(f"{slug}: shown twice {dup[:4]}")
+        rep = sec["union"]
+        accounted = (set(rep["mapped"]) | set(rep["held"]) | {k for k, _ in rep["appended"]}
+                     | {k for k, _, _ in rep["collisions"]})
+        if accounted != set(base_fl):
+            bad21.append(f"{slug}: unaccounted base flavors {sorted(set(base_fl) - accounted)[:4]}")
+        for k, b in rep["appended"]:
+            if names.count(b) != 1:
+                bad21.append(f"{slug}: appended {b!r} not shown exactly once")
+        upper = {n.upper().rstrip("*").strip() for n in names}
+        if held & upper:
+            bad21.append(f"{slug}: held pair-name on menu {sorted(held & upper)}")
+        if rep["collisions"]:
+            bad21.append(f"{slug}: unmapped collisions need mapping {rep['collisions'][:3]}")
+        want_total = sum(len(f) for _, f in curated) + len(rep["appended"])
+        if len(names) != want_total:
+            bad21.append(f"{slug}: {len(names)} flavors, want {want_total}")
+    pc = airtable.load_cache()
+    tmpl = next(r for r in pc["products"] if r["f"].get(FX["sku"]) == "TERP-BOT-MANGO")
+    for sku, bottle, notes in (("TERP-BOT-ZZPLANTED", "ZZ Planted Flavor", ""),
+                               ("TERP-BOT-ZZARCHIVED", "ZZ Archived Flavor", "ARCHIVED planted by check 21"),
+                               ("TERP-BOT-PEACHCOBBLER2", "PEACH COBBLER", "")):
+        row = _copy.deepcopy(tmpl); row["id"] = "rec" + sku
+        row["f"][FX["sku"]] = sku; row["f"][FX["size"]] = bottle; row["f"][FX["notes"]] = notes
+        pc["products"].append(row)
+    pms, _, _ = model.build_models(pc, site)
+    psec = _flav(pms, "terpenes")
+    pnames = [f for g in psec["groups"] for f in g["flavors"]]
+    last = psec["groups"][-1]
+    if last["name"] != ucfg["appended_group"] or "ZZ Planted Flavor" not in last["flavors"]:
+        bad21.append("planted new flavor not appended verbatim under the appended group")
+    if "ZZ Archived Flavor" in pnames:
+        bad21.append("planted archived flavor shown")
+    if pnames.count("Peach Cobbler") != 1 or "PEACH COBBLER" in pnames:
+        bad21.append("colliding planted flavor shown twice")
+    check("21 flavor union: every base flavor exactly once, held names absent, curated unchanged",
+          not bad21, "; ".join(bad21[:6]))
+
+    # 22. box stickers name the shape (Oct 21): within each tier the rows are
+    # distinct and every label carries cart/display/master + top/side/wrap
+    bad22 = []
+    o2m = next(x for x in models if x["slug"] == "o2-devices")
+    box = next(sec for sec in o2m["sections"] if sec.get("header") == "BOX STICKERS")
+    labels = [r["label"] for r in box["rows"]]
+    for tier in ("Standard", "Premium", "Connoisseur"):
+        tl = [l for l in labels if l.startswith(tier + " · ")]
+        if len(tl) != 6 or len(set(tl)) != 6:
+            bad22.append(f"{tier}: {len(set(tl))} distinct of {len(tl)} rows")
+        for l in tl:
+            if not (_re.search(r"Cart|Display|Master", l) and _re.search(r"Top|Side|Wrap", l)):
+                bad22.append(f"no shape in {l!r}")
+    if any(lbl in html("o2-devices") for lbl in ("Standard · ≈3×3 in<", "Premium · ≈3×3 in<")):
+        bad22.append("bare size-only label still rendered")
+    check("22 box-sticker rows name the shape (6 distinct per tier)", not bad22, "; ".join(bad22[:6]))
+
     # 9. every page + PDF carries the build date
     import datetime
-    date = datetime.date.today().strftime("%B %-d, %Y")
+    date = build.pacific_today().strftime("%B %-d, %Y")
     slugs = [m["slug"] for m in models] + ["index"]
     html_ok = all(date in html(s) for s in slugs)
     pdf_ok = all(date in pdf_text(m["slug"]) for m in models)

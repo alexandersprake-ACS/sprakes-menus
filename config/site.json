@@ -24,6 +24,27 @@
     "O2VAPE": "O2 VAPE",
     "Puffco": "Puffco"
   },
+  "_copy_comment": "One-stop-shop rule (Aug 11; forms FORBIDDEN_CUSTOMER_PATTERNS): customer copy never reveals in-house vs external production or local sourcing. Case-insensitive, matched against the rendered TEXT of every page and PDF (markup stripped); any hit refuses to publish. Check 20 pins it.",
+  "copy_forbidden_patterns": [
+    "in-house",
+    "in house",
+    "inhouse",
+    "outsourc",
+    "external production",
+    "externally produced",
+    "sourced locally",
+    "locally sourced",
+    "local sourcing",
+    "sourcing run",
+    "third-party",
+    "third party",
+    "subcontract",
+    "pacer",
+    "vendor",
+    "supplier",
+    "manufacturer",
+    "we partner with"
+  ],
   "_global_exclude_comment": "GUARD-FIRST (Oct 20): SKUs starting with these prefixes are dropped at load and never render on any page/PDF or enter the snapshot. STKR-CUSTOM-STD/-PRM/-CNSR are the new one-per-tier sticker items (size on the order line, no price breaks) - forms-side only; the stickers menu is priced from the forms quote endpoint instead. Check 16 pins this.",
   "global_exclude_prefixes": [
     "STKR-CUSTOM-"

@@ -162,7 +162,13 @@ def _family_section(fam, data, site):
         order = sorted(skus, key=lambda s: (TIER_ORDER.get(data.tier_of(s), 5),
                                             float(data.ref_of(s) or 0), s))
         for sku in order:
-            rows.append({"label": f"{data.tier_of(sku)} · {data.size_of(sku)}",
+            part = data.size_of(sku)
+            if fam.get("label_shape"):
+                # the shape lives only in Product Name ("O2 Box Sticker — Cart
+                # Box Top"); without it same-size shapes read as twin rows
+                shape = (data.name_of(sku) or "").split(" — ", 1)[-1]
+                part = f"{shape} · {part}"
+            rows.append({"label": f"{data.tier_of(sku)} · {part}",
                          "cells": cells_for(sku)})
     else:
         for sku in sorted(skus, key=lambda s: (float(data.ref_of(s) or 0), s)):
@@ -479,9 +485,58 @@ def _devices_menu(m, data, site, warns):
     return _wrap(m, sections, site, disclaimer=False)
 
 
+def _flavor_key(name):
+    """Comparison key only (collision detection) - never used for display."""
+    return re.sub(r"[^A-Z0-9]+", "", (name or "").upper().replace("*", ""))
+
+
+def flavor_union(data, warns):
+    """Curated marketing groups + every base TERP-BOT-* flavor not already
+    represented (config/flavor-union.json), appended under its bottle
+    spelling. Returns (groups, report)."""
+    cur = _load_json("marketing-flavors.json")
+    cfg = _load_json("flavor-union.json")
+    groups = [{"name": g["name"], "flavors": list(g["flavors"])} for g in cur["groups"]]
+    entries = {f for g in groups for f in g["flavors"]}
+    mapping = {**cfg["map_exact"], **cfg["map_riff"], **cfg["map_styled"]}
+    held = set(cfg["held_names"])
+    missing = sorted({v for v in mapping.values() if v not in entries})
+    if missing:
+        raise SystemExit(f"FATAL: flavor-union.json maps to entries missing from "
+                         f"marketing-flavors.json: {missing} — refusing to publish.")
+    seen = {_flavor_key(f): f for f in entries}
+    report = {"mapped": [], "held": [], "appended": [], "collisions": []}
+    appended = []
+    for sku in sorted(s for s in data.products if s.startswith("TERP-BOT-")):
+        bottle = data.size_of(sku)
+        if not bottle:
+            raise SystemExit(f"FATAL: base flavor {sku} has no Size/Type (bottle "
+                             f"spelling) — refusing to publish.")
+        if sku in mapping:
+            if bottle in held:
+                raise SystemExit(f"FATAL: {sku} is both mapped and held — refusing to publish.")
+            report["mapped"].append(sku)
+        elif bottle in held:
+            report["held"].append(sku)
+        elif _flavor_key(bottle) in seen:
+            # same name already on the menu (curated or another bottle): show once
+            report["collisions"].append((sku, bottle, seen[_flavor_key(bottle)]))
+            warns.append(f"flavors: unmapped base flavor {sku} ({bottle!r}) matches "
+                         f"{seen[_flavor_key(bottle)]!r} already on the menu — shown once; "
+                         f"map it in config/flavor-union.json.")
+        else:
+            seen[_flavor_key(bottle)] = bottle
+            appended.append(bottle)
+            report["appended"].append((sku, bottle))
+    if appended:
+        groups.append({"name": cfg["appended_group"], "flavors": sorted(appended)})
+    return groups, report
+
+
 def _terpenes_menu(m, data, site, warns):
     disc = _load_json("disclaimers.json")
     flavors = _load_json("marketing-flavors.json")
+    union = flavor_union(data, warns)
     base = m["base_sku"]
     base_br = data.breaks.get(base, {})
     if not base_br:
@@ -514,7 +569,7 @@ def _terpenes_menu(m, data, site, warns):
     # marketing flavor list
     sections.append({
         "kind": "flavors", "header": "AVAILABLE FLAVORS",
-        "groups": flavors["groups"], "star_note": flavors.get("star_note"),
+        "groups": union[0], "star_note": flavors.get("star_note"), "union": union[1],
     })
     return _wrap(m, sections, site, disclaimer=disc["terpene_disclaimer"])
 
@@ -522,6 +577,7 @@ def _terpenes_menu(m, data, site, warns):
 def _infusion_menu(m, data, site, warns):
     disc = _load_json("disclaimers.json")
     flavors = _load_json("marketing-flavors.json")
+    union = flavor_union(data, warns)
     svc = m["service_sku"]
     ref = data.ref_of(svc)
     br = data.breaks.get(svc, {})
@@ -557,7 +613,7 @@ def _infusion_menu(m, data, site, warns):
         "rush": money_flat(rush_ref, site["quote_text"]) if rush_ref else None,
     }, {
         "kind": "flavors", "header": "TERPENE FLAVORS",
-        "groups": flavors["groups"], "star_note": flavors.get("star_note"),
+        "groups": union[0], "star_note": flavors.get("star_note"), "union": union[1],
     }]
     return _wrap(m, sections, site, disclaimer=disc["terpene_disclaimer"])
 
