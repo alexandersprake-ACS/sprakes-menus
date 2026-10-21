@@ -70,10 +70,19 @@ class Data:
         # matching SKUs never reach any family, page, PDF, or the price snapshot
         exclude = tuple(exclude)
         self.products = {}  # sku -> fields dict
+        # archive guard (Oct 21): a product whose Notes begin "ARCHIVED" is
+        # dropped like an excluded prefix. The menus never read On Form —
+        # jar-alone, CAP and CAPW are Off Form by ruling and must render.
+        self.archived = {}  # sku -> notes
         for r in cache["products"]:
             sku = r["f"].get(F["sku"])
-            if sku and not sku.startswith(exclude):
-                self.products[sku] = r["f"]
+            if not sku or sku.startswith(exclude):
+                continue
+            notes = (r["f"].get(F["notes"]) or "").lstrip()
+            if notes.startswith("ARCHIVED"):
+                self.archived[sku] = notes
+                continue
+            self.products[sku] = r["f"]
         # breaks: sku -> {qty(int): price}
         self.breaks = {}
         for r in cache["price_breaks"]:
@@ -81,7 +90,7 @@ class Data:
             if " @" not in label:
                 continue
             sku, q = label.rsplit(" @", 1)
-            if exclude and sku.startswith(exclude):
+            if (exclude and sku.startswith(exclude)) or sku in self.archived:
                 continue
             try:
                 qty = int(float(q))
@@ -89,6 +98,8 @@ class Data:
                 continue
             self.breaks.setdefault(sku, {})[qty] = r["f"].get(F["price"])
         self.categories = [r["f"].get(F["cat_name"]) for r in cache["categories"]]
+        self.suppliers = [r["f"].get(F["supplier_name"]) for r in cache.get("suppliers", [])
+                          if r["f"].get(F["supplier_name"])]
 
     def family(self, prefix, exclude=()):
         F = airtable.F
@@ -643,9 +654,36 @@ BUILDERS = {
 }
 
 
+def _archived_config_refs(menus_cfg, archived):
+    """Archived SKUs that config still points at: any config string equal to
+    an archived SKU, or an archived SKU under a dressed-component prefix
+    (it would silently blank a dressed price)."""
+    refs, prefixes = set(), set()
+
+    def walk(o, key=None):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                walk(v, k)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v, key)
+        elif isinstance(o, str):
+            if key == "dressed_components":
+                prefixes.add(o)
+            elif o in archived:
+                refs.add(o)
+    walk(menus_cfg)
+    refs |= {s for s in archived if prefixes and s.startswith(tuple(prefixes))}
+    return sorted(refs)
+
+
 def build_models(cache, site):
     data = Data(cache, site.get("global_exclude_prefixes", []))
     menus_cfg = _load_json("menus.json")["menus"]
+    stale = _archived_config_refs(menus_cfg, data.archived)
+    if stale:
+        raise SystemExit("FATAL: config references ARCHIVED product(s) " + ", ".join(stale)
+                         + " — remove them from config/menus.json; refusing to publish.")
     warns = []
     models = []
     for m in sorted(menus_cfg, key=lambda x: x["order"]):

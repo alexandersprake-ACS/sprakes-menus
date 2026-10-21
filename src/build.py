@@ -85,18 +85,47 @@ def render_index(models, site, build_date):
     return render.render_hub(models, site, build_date)
 
 
-def forbidden_scan(site):
-    bad = site.get("forbidden_strings", [])
+def forbidden_terms(site, data):
+    """Static list (site.json forbidden_strings) + every Supplier Name in the
+    base, except suppliers that are also product brands customers must see
+    (site.json supplier_brand_allow)."""
+    allow = site.get("supplier_brand_allow", {})
+    terms = list(site.get("forbidden_strings", []))
+    terms += [n for n in data.suppliers if n not in allow and n not in terms]
+    return terms
+
+
+def _pdf_texts():
+    import fitz  # pymupdf (requirements.txt)
+    d = os.path.join(SITE, "pdf")
+    for fn in sorted(os.listdir(d)) if os.path.isdir(d) else []:
+        if fn.endswith(".pdf"):
+            doc = fitz.open(os.path.join(d, fn))
+            yield "pdf/" + fn, " ".join("".join(p.get_text() for p in doc).split())
+
+
+def forbidden_scan(site, terms, pdfs=True):
+    """Case-insensitive scan of every built HTML page and, when present, the
+    text of every PDF (the PDFs are what get forwarded)."""
     hits = []
-    for fn in os.listdir(SITE):
-        if not fn.endswith(".html"):
-            continue
+    texts = [(fn, open(os.path.join(SITE, fn), encoding="utf-8").read())
+             for fn in sorted(os.listdir(SITE)) if fn.endswith(".html")]
+    if pdfs:
+        texts += list(_pdf_texts())
+    for fn, text in texts:
         # case-insensitive: menu copy is often rendered in caps (SLAPHUB == SlapHub)
-        text = open(os.path.join(SITE, fn), encoding="utf-8").read().lower()
-        for b in bad:
-            if b.lower() in text:
+        low = text.lower()
+        for b in terms:
+            if b.lower() in low:
                 hits.append((fn, b))
     return hits
+
+
+def _refuse_on_hits(hits, what):
+    if hits:
+        for fn, b in hits:
+            print(f"  FORBIDDEN {what} '{b}' found in {fn}", file=sys.stderr)
+        raise SystemExit(f"FATAL: forbidden {what} present — refusing to publish.")
 
 
 def copy_assets():
@@ -203,12 +232,9 @@ def main(argv=None):
         with open(os.path.join(SITE, "CNAME"), "w") as fh:
             fh.write(site["custom_domain"] + "\n")
 
-    # hard gate: forbidden strings (spec 5.1 / 8.7)
-    hits = forbidden_scan(site)
-    if hits:
-        for fn, b in hits:
-            print(f"  FORBIDDEN STRING '{b}' found in {fn}", file=sys.stderr)
-        raise SystemExit("FATAL: forbidden strings present — refusing to publish.")
+    # hard gate: forbidden strings + base supplier names (spec 5.1 / 8.7), HTML
+    terms = forbidden_terms(site, data)
+    _refuse_on_hits(forbidden_scan(site, terms, pdfs=False), "string")
 
     # PDFs
     if not args.no_pdf:
@@ -218,6 +244,8 @@ def main(argv=None):
             pdf.html_to_pdf(chrome, os.path.join(SITE, m["slug"] + ".html"),
                             os.path.join(SITE, "pdf", m["slug"] + ".pdf"))
         print(f"  exported {len(models)} PDFs")
+        # same gate over the PDF text, before anything can publish
+        _refuse_on_hits([h for h in forbidden_scan(site, terms) if h[0].startswith("pdf/")], "string")
 
     # persist snapshot for next DIFF
     with open(SNAP, "w", encoding="utf-8") as fh:

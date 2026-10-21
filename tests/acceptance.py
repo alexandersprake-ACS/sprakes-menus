@@ -131,8 +131,8 @@ def main():
     check("6e Approved disclaimer wording on both menus", ok6e)
 
     # 7. forbidden strings absent across whole site
-    hits = build.forbidden_scan(site)
-    check("7 no forbidden strings site-wide", not hits, str(hits))
+    hits = build.forbidden_scan(site, build.forbidden_terms(site, data))
+    check("7 no forbidden strings site-wide (HTML + PDF, incl. base supplier names)", not hits, str(hits))
 
     # 8. DIFF names exactly the changed menu/item/old/new
     snap = build.compute_snapshot(data)
@@ -357,6 +357,78 @@ def main():
         check(f"17b [DATA] sticker grid is {ver}, fixture pins {fx['grid_version']} - "
               f"verify the new live chart, then refresh tests/fixtures", False)
 
+    # 18. archive guard (Oct 21): a product whose Notes begin "ARCHIVED" never
+    # loads, renders, or enters a dressed composition; config pointing at one
+    # is fatal. Plant a fake archived GLSJAR- row (control: the same row
+    # un-archived DOES render) and archive a config-referenced SKU.
+    bad18 = []
+    import copy as _copy
+    FX = airtable.F
+
+    def _plant(notes):
+        c = airtable.load_cache()
+        src = next(r for r in c["products"] if r["f"].get(FX["sku"]) == "GLSJAR-STD-CLR-2OZ")
+        row = _copy.deepcopy(src); row["id"] = "recPLANTED"
+        row["f"][FX["sku"]] = "GLSJAR-STD-CLR-9OZ"; row["f"][FX["size"]] = "9oz PLANTED / Clear glass"
+        row["f"][FX["notes"]] = notes
+        c["products"].append(row)
+        for r in [r for r in c["price_breaks"] if (r["f"].get(FX["break"]) or "").startswith("GLSJAR-STD-CLR-2OZ @")]:
+            b = _copy.deepcopy(r); b["f"][FX["break"]] = b["f"][FX["break"]].replace("2OZ", "9OZ")
+            c["price_breaks"].append(b)
+        return c
+    def _glass_labels(c):
+        ms, _, d = model.build_models(c, site)
+        g = next(mm for mm in ms if mm["slug"] == "glass-jars")
+        return [r["label"] for sec in g["sections"] for r in sec.get("rows", [])], d
+    ctl, _ = _glass_labels(_plant("live row"))
+    arc, d18 = _glass_labels(_plant("ARCHIVED Oct 21 2026: planted by check 18"))
+    if not any("PLANTED" in l for l in ctl):
+        bad18.append("control row did not render (plant broken)")
+    if any("PLANTED" in l for l in arc) or "GLSJAR-STD-CLR-9OZ" in d18.products:
+        bad18.append("archived GLSJAR row rendered/loaded")
+    if "GLSJAR-STD-CLR-9OZ" in d18.breaks:
+        bad18.append("archived row's breaks loaded")
+    if any(s.startswith("STKR-") and not s.startswith("STKR-CUSTOM-") for s in data.products):
+        bad18.append("live archived STKR size items loaded")
+    for victim in ("TERP-CDT", "CAPW-GLSJAR-STD"):  # config SKU / dressed component
+        c = airtable.load_cache()
+        for r in c["products"]:
+            if r["f"].get(FX["sku"]) == victim:
+                r["f"][FX["notes"]] = "ARCHIVED planted by check 18"
+        try:
+            model.build_models(c, site)
+            bad18.append(f"archived config-referenced {victim} did not fail loud")
+        except SystemExit:
+            pass
+    check("18 archive guard: ARCHIVED notes never render; config refs fail loud",
+          not bad18, "; ".join(bad18[:6]))
+
+    # 19. supplier guard (Oct 21): every base Supplier Name is forbidden unless
+    # allow-listed as a customer-facing brand; the scan covers PDF text too
+    bad19 = []
+    terms = build.forbidden_terms(site, data)
+    allow = site.get("supplier_brand_allow", {})
+    if len(data.suppliers) < 1:
+        bad19.append("no suppliers loaded")
+    for n in data.suppliers:
+        if (n in allow) == (n in terms):
+            bad19.append(f"{n}: allow-list/forbidden mismatch")
+    for keep in ("StickerApp", "StickerPlug", "SlapHub", "Pacer", "$0.00"):
+        if keep not in terms:
+            bad19.append(f"static term {keep} dropped")
+    if not any(fn.startswith("pdf/") for fn, _ in build._pdf_texts()):
+        bad19.append("PDF texts not scanned")
+    probe = next(n for n in data.suppliers if n not in allow)
+    tmp = os.path.join(SITE, "zz-check19.html")
+    open(tmp, "w").write(f"<p>{probe.upper()}</p>")
+    try:
+        if not any(fn == "zz-check19.html" for fn, _ in build.forbidden_scan(site, terms, pdfs=False)):
+            bad19.append(f"planted supplier {probe!r} not caught")
+    finally:
+        os.remove(tmp)
+    check("19 supplier guard: base supplier names forbidden (brand allow-list), HTML + PDF",
+          not bad19, "; ".join(bad19[:6]))
+
     # 9. every page + PDF carries the build date
     import datetime
     date = datetime.date.today().strftime("%B %-d, %Y")
@@ -377,6 +449,9 @@ def main():
         for p in (mc.get("prefix"), mc.get("cap_prefix"), mc.get("wrap_prefix")):
             if p:
                 tiers |= {data.tier_of(s) for s in data.family(p)}
+        if mc.get("chart"):  # endpoint-priced (stickers): tiered by construction
+            from src import sticker_quote
+            tiers |= set(sticker_quote.TIERS)
         tiered = bool(tiers & {"Standard", "Premium", "Connoisseur"})
         present = marker in html(mc["slug"])
         if tiered != present:

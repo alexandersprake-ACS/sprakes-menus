@@ -18,6 +18,12 @@
     "SlapHub",
     "$0.00"
   ],
+  "_supplier_comment": "Supplier guard (Oct 21): every Supplier Name in the base (Suppliers table, fetched and cursor-checked like Products) is ALSO forbidden, scanned over HTML and PDF text. Suppliers that are also product brands customers must see are allow-listed here (supplier name -> the brand customers read).",
+  "supplier_brand_allow": {
+    "Miron Violetglass USA Inc.": "Miron",
+    "O2VAPE": "O2 VAPE",
+    "Puffco": "Puffco"
+  },
   "_global_exclude_comment": "GUARD-FIRST (Oct 20): SKUs starting with these prefixes are dropped at load and never render on any page/PDF or enter the snapshot. STKR-CUSTOM-STD/-PRM/-CNSR are the new one-per-tier sticker items (size on the order line, no price breaks) - forms-side only; the stickers menu is priced from the forms quote endpoint instead. Check 16 pins this.",
   "global_exclude_prefixes": [
     "STKR-CUSTOM-"

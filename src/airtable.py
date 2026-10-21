@@ -21,6 +21,7 @@ BASE_ID = "appPAgwMs1Sy1z4v6"
 T_PRODUCTS = "tblp8UkHqUwEIsNEz"
 T_BREAKS = "tblfECeq4Zanuc4FY"
 T_CATEGORIES = "tblcp9r1nvsSkRKM8"
+T_SUPPLIERS = "tbl74q4kaoU6gfIrG"
 
 F = {
     "sku": "fldYd6kDMtWPxZz8Z",
@@ -30,6 +31,7 @@ F = {
     "ref_price": "fldZDzFhIxRDebHsY",
     "unit": "fldHr6ozaLPldU4WV",
     "category": "fld2hEdNlmUa4ip4m",
+    "notes": "fldWIZI7zomG4qm0x",
     # price breaks
     "break": "fldhI64u3nhBh5LmX",
     "qty": "fldAVCZaPO0DVaRrz",
@@ -37,6 +39,8 @@ F = {
     "break_product": "fldjYfG7MUPb4Bfy8",
     # categories
     "cat_name": "fldVa5NVDGLD7YDev",
+    # suppliers (names feed the forbidden-string guard)
+    "supplier_name": "fldpOnZfTzPuUbHeU",
 }
 
 CACHE_DIR = os.path.join(os.path.dirname(__file__), "..", "build-cache")
@@ -44,6 +48,7 @@ TABLES = {
     "products": (T_PRODUCTS, "products.raw.json"),
     "price_breaks": (T_BREAKS, "price_breaks.raw.json"),
     "categories": (T_CATEGORIES, "categories.raw.json"),
+    "suppliers": (T_SUPPLIERS, "suppliers.raw.json"),
 }
 
 
@@ -140,7 +145,7 @@ def _fetch_table(table_id, token):
 
 
 def fetch_all(token):
-    """Fetch all three tables via REST and write REST-shaped cache files.
+    """Fetch every table in TABLES via REST and write REST-shaped cache files.
 
     FAILS (raises) if a table returns zero records or the API is unreachable.
     """
